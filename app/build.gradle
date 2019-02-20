@@ -13,6 +13,8 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField "String", "CHROMECAST_APP_ID", '"92E34A8C"'
     }
     buildTypes {
         release {
