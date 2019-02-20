@@ -20,6 +20,8 @@ interface Player {
 
     fun removeListener(listener: PlayerCallback): Boolean
 
+    fun getListeners(): MutableSet<PlayerCallback>
+
     fun prepare(mediaContent: MediaContent)
 
     fun play()
