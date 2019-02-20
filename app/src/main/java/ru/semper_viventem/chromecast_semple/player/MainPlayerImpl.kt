@@ -13,7 +13,7 @@ class MainPlayerImpl(
 ) : Player {
 
     companion object {
-        private const val MEDIA_SESSION_DAFAULT_TAG = "main_player"
+        private const val MEDIA_SESSION_DEFAULT_TAG = "media_session_audio"
     }
 
     private val castCallback = object : ChromeCastDelegate.ChromeCastListener {
@@ -76,7 +76,7 @@ class MainPlayerImpl(
     init {
         val playerCallbackInternal = PlayerCallbackInternal()
 
-        val mediaSessionDelegate = MediaSessionDelegate(context, MediaSessionCompat(context, customMediaSessionTag ?: MEDIA_SESSION_DAFAULT_TAG))
+        val mediaSessionDelegate = MediaSessionDelegate(context, MediaSessionCompat(context, customMediaSessionTag ?: MEDIA_SESSION_DEFAULT_TAG))
         val chromeCastDelegate = ChromeCastDelegate(context, castCallback, playerCallbackInternal)
         val exoPlayerDelegate = ExoPlayerDelegate(context, playerCallbackInternal)
 
