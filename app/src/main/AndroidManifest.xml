@@ -4,6 +4,8 @@
         xmlns:tools="http://schemas.android.com/tools"
         package="ru.semper_viventem.chromecast_semple">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
             android:name=".TheApplication"
             android:allowBackup="true"
@@ -14,7 +16,9 @@
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning">
 
-        <activity android:name=".MainActivity">
+        <activity
+                android:name=".MainActivity"
+                android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -24,7 +28,7 @@
 
         <meta-data
                 android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
-                android:value="ru.semper_viventem.chromecast_semple.player.CastOptionsProvider" />
+                android:value="ru.semper_viventem.chromecast_semple.player.CastOptionsProvider"/>
     </application>
 
 </manifest>

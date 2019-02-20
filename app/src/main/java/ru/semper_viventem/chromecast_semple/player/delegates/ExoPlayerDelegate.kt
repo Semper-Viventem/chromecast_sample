@@ -10,6 +10,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.upstream.HttpDataSource
+import ru.semper_viventem.chromecast_semple.R
 import ru.semper_viventem.chromecast_semple.player.ExtendedSimpleExoPlayer
 import ru.semper_viventem.chromecast_semple.player.MediaContent
 import ru.semper_viventem.chromecast_semple.player.PlayingDelegate
@@ -24,6 +25,7 @@ class ExoPlayerDelegate(
     var simpleExoPlayer: ExtendedSimpleExoPlayer? = null
         private set
 
+    private val applicationName: String = context.getString(R.string.app_name)
     private lateinit var playlist: DynamicConcatenatingMediaSource
 
     // playing delegate
@@ -60,7 +62,7 @@ class ExoPlayerDelegate(
 
         playlist = DynamicConcatenatingMediaSource()
 
-        val dataFactory = DefaultDataSourceFactory(context, "")
+        val dataFactory = DefaultDataSourceFactory(context, applicationName)
         val audioSource = ExtractorMediaSource(mediaContent.contentUri, dataFactory, extractorsFactory, null, null)
         playlist.addMediaSource(audioSource)
 

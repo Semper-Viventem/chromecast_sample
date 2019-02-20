@@ -21,11 +21,11 @@ class MainActivity : AppCompatActivity() {
 
     private val playerCallback = object : Player.PlayerCallback {
         override fun onPlaying(currentPosition: Long) {
-            playButton.setImageResource(R.drawable.ic_play)
+            playButton.setImageResource(R.drawable.ic_pause)
         }
 
         override fun onPaused(currentPosition: Long) {
-            playButton.setImageResource(R.drawable.ic_pause)
+            playButton.setImageResource(R.drawable.ic_play)
         }
 
         override fun onPreparing() {
@@ -92,6 +92,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initPlayer() {
         player = MainPlayerImpl(this)
+        player.addListener(playerCallback)
     }
 
     private fun initUi() {
