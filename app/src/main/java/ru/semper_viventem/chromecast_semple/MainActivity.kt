@@ -4,6 +4,7 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import com.google.android.gms.cast.framework.CastButtonFactory
 import kotlinx.android.synthetic.main.activity_main.*
 import ru.semper_viventem.chromecast_semple.player.MainPlayerImpl
 import ru.semper_viventem.chromecast_semple.player.MediaContent
@@ -93,6 +94,7 @@ class MainActivity : AppCompatActivity() {
     private fun initPlayer() {
         player = MainPlayerImpl(this)
         player.addListener(playerCallback)
+        CastButtonFactory.setUpMediaRouteButton(applicationContext, mediaRouterButton)
     }
 
     private fun initUi() {
