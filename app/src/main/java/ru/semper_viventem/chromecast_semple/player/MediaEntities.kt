@@ -4,7 +4,7 @@ import android.net.Uri
 
 data class MediaContent(
     val type: Type,
-    val contentUris: List<Uri>,
+    val contentUri: Uri,
     val metadata: MediaMetadata? = null
 ) {
     enum class Type {

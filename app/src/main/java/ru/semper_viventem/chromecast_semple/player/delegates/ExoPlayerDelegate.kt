@@ -2,7 +2,6 @@ package ru.semper_viventem.chromecast_semple.player.delegates
 
 import android.content.Context
 import com.google.android.exoplayer2.*
-import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
 import com.google.android.exoplayer2.source.DynamicConcatenatingMediaSource
 import com.google.android.exoplayer2.source.ExtractorMediaSource
@@ -11,7 +10,10 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.upstream.HttpDataSource
-import ru.semper_viventem.chromecast_semple.player.*
+import ru.semper_viventem.chromecast_semple.player.ExtendedSimpleExoPlayer
+import ru.semper_viventem.chromecast_semple.player.MediaContent
+import ru.semper_viventem.chromecast_semple.player.PlayingDelegate
+import ru.semper_viventem.chromecast_semple.player.SpeedProvider
 import timber.log.Timber
 
 class ExoPlayerDelegate(
@@ -57,11 +59,10 @@ class ExoPlayerDelegate(
         val extractorsFactory = DefaultExtractorsFactory()
 
         playlist = DynamicConcatenatingMediaSource()
-        mediaContent.contentUris.forEach {
-            val dataFactory = DefaultDataSourceFactory(context, "")
-            val audioSource = ExtractorMediaSource(it, dataFactory, extractorsFactory, null, null)
-            playlist.addMediaSource(audioSource)
-        }
+
+        val dataFactory = DefaultDataSourceFactory(context, "")
+        val audioSource = ExtractorMediaSource(mediaContent.contentUri, dataFactory, extractorsFactory, null, null)
+        playlist.addMediaSource(audioSource)
 
         simpleExoPlayer = ExtendedSimpleExoPlayer(
             DefaultRenderersFactory(context),
