@@ -40,4 +40,7 @@ dependencies {
     // Player
     implementation("com.google.android.exoplayer:exoplayer-core:r2.5.4")
     implementation("com.google.android.exoplayer:exoplayer-ui:r2.5.4")
+
+    // Logging
+    implementation "com.jakewharton.timber:timber:4.7.1"
 }
