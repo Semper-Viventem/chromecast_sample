@@ -169,8 +169,6 @@ class MainPlayerImpl(
 
         open fun pause() = Timber.e("illegal state for pause")
 
-        open fun setPosition(positionInMillis: Long = 0) = Timber.e("illegal state for setPosition")
-
         open fun notifyListeners() = Timber.e("illegal state for notifyListeners")
 
         fun release() {
