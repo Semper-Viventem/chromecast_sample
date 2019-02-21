@@ -13,7 +13,7 @@ import com.bumptech.glide.request.target.Target
 import ru.semper_viventem.chromecast_semple.player.MediaContent
 import ru.semper_viventem.chromecast_semple.player.PlayerStateListener
 
-class MediaSessionDelegate(
+class MediaSessionListener(
     private val context: Context,
     private val mediaSessionCompat: MediaSessionCompat
 ): PlayerStateListener {

@@ -4,7 +4,7 @@ import android.content.Context
 import android.support.v4.media.session.MediaSessionCompat
 import ru.semper_viventem.chromecast_semple.player.delegates.ChromeCastDelegate
 import ru.semper_viventem.chromecast_semple.player.delegates.ExoPlayerDelegate
-import ru.semper_viventem.chromecast_semple.player.delegates.MediaSessionDelegate
+import ru.semper_viventem.chromecast_semple.player.delegates.MediaSessionListener
 import timber.log.Timber
 
 class MainPlayerImpl(
@@ -76,7 +76,7 @@ class MainPlayerImpl(
     init {
         val playerCallbackInternal = PlayerCallbackInternal()
 
-        val mediaSessionDelegate = MediaSessionDelegate(context, MediaSessionCompat(context, customMediaSessionTag ?: MEDIA_SESSION_DEFAULT_TAG))
+        val mediaSessionDelegate = MediaSessionListener(context, MediaSessionCompat(context, customMediaSessionTag ?: MEDIA_SESSION_DEFAULT_TAG))
         val chromeCastDelegate = ChromeCastDelegate(context, castCallback, playerCallbackInternal)
         val exoPlayerDelegate = ExoPlayerDelegate(context, playerCallbackInternal)
 
