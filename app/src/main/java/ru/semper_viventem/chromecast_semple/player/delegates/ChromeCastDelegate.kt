@@ -132,9 +132,6 @@ class ChromeCastDelegate(
 
     override fun prepare(mediaContent: MediaContent) {
 
-        // игнорируем если это видео
-        if (mediaContent.type == MediaContent.Type.VIDEO) return
-
         sessionManager = CastContext.getSharedInstance(context).sessionManager
         sessionManager?.addSessionManagerListener(mediaSessionListener, CastSession::class.java)
         currentSession = sessionManager?.currentCastSession
