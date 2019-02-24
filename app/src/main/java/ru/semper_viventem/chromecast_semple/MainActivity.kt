@@ -2,6 +2,7 @@ package ru.semper_viventem.chromecast_semple
 
 import android.net.Uri
 import android.os.Bundle
+import android.support.v4.media.session.MediaSessionCompat
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.google.android.gms.cast.framework.CastButtonFactory
@@ -16,6 +17,7 @@ class MainActivity : AppCompatActivity() {
     private companion object {
         private const val FORWARD_TIME = 10_000L
         private const val REWIND_TIME = 10_000L
+        private const val MEDIA_SESSION_TAG = "media_session_audio"
     }
 
     private lateinit var player: Player
@@ -92,7 +94,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initPlayer() {
-        player = MainPlayerImpl(this)
+        val mediaSession = MediaSessionCompat(this, MEDIA_SESSION_TAG)
+        player = MainPlayerImpl(this, mediaSession)
         player.addListener(playerCallback)
         CastButtonFactory.setUpMediaRouteButton(applicationContext, mediaRouterButton)
     }

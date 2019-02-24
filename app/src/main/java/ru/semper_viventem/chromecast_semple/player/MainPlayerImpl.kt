@@ -9,7 +9,7 @@ import timber.log.Timber
 
 class MainPlayerImpl(
     context: Context,
-    customMediaSessionTag: String? = null
+    mediaSession: MediaSessionCompat
 ) : Player {
 
     companion object {
@@ -76,7 +76,7 @@ class MainPlayerImpl(
     init {
         val playerCallbackInternal = PlayerCallbackInternal()
 
-        val mediaSessionDelegate = MediaSessionListener(context, MediaSessionCompat(context, customMediaSessionTag ?: MEDIA_SESSION_DEFAULT_TAG))
+        val mediaSessionDelegate = MediaSessionListener(context, mediaSession)
         val chromeCastDelegate = ChromeCastDelegate(context, castCallback, playerCallbackInternal)
         val exoPlayerDelegate = ExoPlayerDelegate(context, playerCallbackInternal)
 
