@@ -73,6 +73,16 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    val mediaSessionCallback = object: MediaSessionCompat.Callback() {
+        override fun onPlay() {
+            player.play()
+        }
+
+        override fun onPause() {
+            player.pause()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -82,7 +92,7 @@ class MainActivity : AppCompatActivity() {
 
         val mediaContent = MediaContent(
             type = MediaContent.Type.AUDIO,
-            contentUri = Uri.parse("http://download.publicradio.org/podcast/minnesota/classical/programs/free-downloads/2015/09/17/daily_download_20150917_128.mp3"),
+            contentUri = Uri.parse("https://download.stream.publicradio.org/podcast/minnesota/classical/programs/free-downloads/2015/09/17/daily_download_20150917_128.mp3"),
             metadata = MediaMetadata(
                 author = "Camille Saint-Saens",
                 title = "Danse macabre",
@@ -94,7 +104,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initPlayer() {
-        val mediaSession = MediaSessionCompat(this, MEDIA_SESSION_TAG)
+        val mediaSession = MediaSessionCompat(this, MEDIA_SESSION_TAG).apply {
+            setCallback(mediaSessionCallback)
+        }
+
         player = MainPlayerImpl(this, mediaSession)
         player.addListener(playerCallback)
         CastButtonFactory.setUpMediaRouteButton(applicationContext, mediaRouterButton)
