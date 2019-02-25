@@ -1,7 +1,7 @@
 # Chromecast media player **(Android)**
 Sample of player with chromecast supporting
 
-## architecture
+## Architecture
 The architecture of the player is based on the state machine and the delegates system for controlling playback.
 
 ### State Machine
