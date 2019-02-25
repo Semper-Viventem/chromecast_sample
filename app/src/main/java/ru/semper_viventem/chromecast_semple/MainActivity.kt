@@ -82,11 +82,11 @@ class MainActivity : AppCompatActivity() {
 
         val mediaContent = MediaContent(
             type = MediaContent.Type.AUDIO,
-            contentUri = Uri.parse("https://www.youtube.com/audiolibrary_download?vid=dd349ceb26f97c13"),
+            contentUri = Uri.parse("http://download.publicradio.org/podcast/minnesota/classical/programs/free-downloads/2015/09/17/daily_download_20150917_128.mp3"),
             metadata = MediaMetadata(
-                author = "Dan Lebowitz",
-                title = "March On",
-                posterUrl = "https://jacobsmedia.com/wp-content/uploads/2016/05/rock-n-roll.jpg"
+                author = "Camille Saint-Saens",
+                title = "Danse macabre",
+                posterUrl = "https://images-na.ssl-images-amazon.com/images/I/61SUsgRlbqL._SX373_BO1,204,203,200_.jpg"
             )
         )
 
