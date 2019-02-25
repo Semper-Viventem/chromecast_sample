@@ -1,4 +1,4 @@
-# chromecast_sample
+# Chromecast media player **(Android)**
 Sample of player with chromecast supporting
 
 ## architecture
