@@ -5,20 +5,21 @@ Sample of player with chromecast supporting
 The architecture of the player is based on the state machine and the delegates system for controlling playback.
 
 ### State Machine
-Inside the player is a State Machine with such a multitude of states:
+Inside the MainMediaPlayer is a State Machine with such a multitude of states:
 
-Empty - the initial state before initialization.
-Preparing - player in initializes playback of media content.
-Prepared - media is loaded and ready to play.
-Playing
-Paused
-WaitingForNetwork
-Error
+* Empty - the initial state before initialization.
+* Preparing - player in initializes playback of media content.
+* Prepared - media is loaded and ready to play.
+* Playing
+* Paused
+* WaitingForNetwork
+* Error
 
 <img src="/docs/images/PlayerStates.png">
 
 ### Delegates system
 Main MediaPlayer have system of delegates and listeners. 
+
 PlayingDelegate is an object for control media playing (ext. ExoPlayer, MediaPlayer, Chromecast). All delegates can receive Player status events: Play, Pause, etc. - but only the lead delegate will play the media content.
 StateListeners is an object for notification of entities dependent on the state of the media player (ext. MediaSession)
 
