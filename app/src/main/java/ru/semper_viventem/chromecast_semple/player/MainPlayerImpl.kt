@@ -12,10 +12,6 @@ class MainPlayerImpl(
     mediaSession: MediaSessionCompat
 ) : Player {
 
-    companion object {
-        private const val MEDIA_SESSION_DEFAULT_TAG = "media_session_audio"
-    }
-
     private val castCallback = object : ChromeCastDelegate.ChromeCastListener {
 
         override fun onCastStarted() {
