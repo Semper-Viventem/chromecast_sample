@@ -72,12 +72,12 @@ class MainPlayerImpl(
     init {
         val playerCallbackInternal = PlayerCallbackInternal()
 
-        val mediaSessionDelegate = MediaSessionListener(context, mediaSession)
+        val mediaSessionListener = MediaSessionListener(context, mediaSession)
         val chromeCastDelegate = ChromeCastDelegate(context, castCallback, playerCallbackInternal)
         val exoPlayerDelegate = ExoPlayerDelegate(context, playerCallbackInternal)
 
         with(stateListeners) {
-            add(mediaSessionDelegate)
+            add(mediaSessionListener)
         }
 
         with(playingDelegates) {
