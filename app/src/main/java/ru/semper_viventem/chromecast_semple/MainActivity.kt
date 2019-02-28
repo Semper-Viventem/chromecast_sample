@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    val mediaSessionCallback = object: MediaSessionCompat.Callback() {
+    private val mediaSessionCallback = object: MediaSessionCompat.Callback() {
         override fun onPlay() {
             player.play()
         }
