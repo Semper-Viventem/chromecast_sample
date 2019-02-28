@@ -3,6 +3,7 @@ package ru.semper_viventem.chromecast_semple
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.media.session.MediaSessionCompat
+import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.google.android.gms.cast.framework.CastButtonFactory
@@ -131,6 +132,23 @@ class MainActivity : AppCompatActivity() {
             val newTime = player.positionInMillis - REWIND_TIME
             player.positionInMillis = if (newTime < 0) 0 else newTime
         }
+
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    player.positionInMillis = progress.toLong()
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                // do nothing
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                // do nothing
+            }
+
+        })
     }
 
     private fun prepare(mediaContent: MediaContent) {
