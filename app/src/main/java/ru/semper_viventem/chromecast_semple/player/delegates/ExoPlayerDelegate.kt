@@ -111,11 +111,11 @@ class ExoPlayerDelegate(
 
     override fun release() {
         stopProgressHandler()
-        simpleExoPlayer?.let {
-            it.stop()
-            it.release()
-            simpleExoPlayer = null
+        simpleExoPlayer?.apply {
+            stop()
+            release()
         }
+        simpleExoPlayer = null
         getListeners().forEach { it.onReleased() }
     }
 
