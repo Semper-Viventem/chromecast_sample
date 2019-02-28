@@ -120,8 +120,9 @@ class ExoPlayerDelegate(
     }
 
     override fun netwarkIsRestored() {
-        if (isLeading)
+        if (isLeading) {
             simpleExoPlayer!!.prepare(playlist, false, true)
+        }
     }
 
     override fun onLeading(positionMills: Long, isPlaying: Boolean) {
