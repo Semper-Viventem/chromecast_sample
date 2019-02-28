@@ -22,14 +22,14 @@
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="56dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:titleTextColor="@color/white"
-        app:subtitleTextColor="@color/white"
         android:background="@drawable/toolbar_gradient"
-        tools:title="Track name"
-        tools:subtitle="author name"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:subtitleTextColor="@color/white"
+        app:titleTextColor="@color/white"
+        tools:subtitle="author name"
+        tools:title="Track name"/>
 
     <View
         android:id="@+id/controlCenterBackground"
@@ -39,6 +39,18 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
+
+    <androidx.appcompat.widget.AppCompatSeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:paddingEnd="0dp"
+        android:paddingStart="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/controlCenterBackground"
+        tools:progress="50"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/playButton"

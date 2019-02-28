@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onDurationChanged(duration: Long) {
-            // do nothing
+            seekBar.max = duration.toInt()
         }
 
         override fun onSetSpeed(speed: Float) {
@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onPlayerProgress(currentPosition: Long) {
-            // do nothing
+            seekBar.progress = currentPosition.toInt()
         }
 
     }
