@@ -97,6 +97,10 @@ class ChromeCastDelegate(
         }
     }
 
+    private val progressListener = RemoteMediaClient.ProgressListener { progressMs, durationMs ->
+        playerCallback.onPlayerProgress(progressMs)
+    }
+
     // Playing delegate
 
     override val isReleased: Boolean = false
@@ -209,10 +213,7 @@ class ChromeCastDelegate(
             remoteMediaClient.unregisterCallback(castStatusCallback)
             remoteMediaClient.load(mediaInfo, mediaLoadOptions)
             remoteMediaClient.registerCallback(castStatusCallback)
-            remoteMediaClient.addProgressListener(
-                { progressMs, durationMs -> playerCallback.onPlayerProgress(progressMs) },
-                PROGRESS_DELAY_MILLS
-            )
+            remoteMediaClient.addProgressListener(progressListener, PROGRESS_DELAY_MILLS)
         }
     }
 
@@ -221,6 +222,7 @@ class ChromeCastDelegate(
             sessionManager?.removeSessionManagerListener(mediaSessionListener, CastSession::class.java)
         }
         currentSession?.remoteMediaClient?.unregisterCallback(castStatusCallback)
+        currentSession?.remoteMediaClient?.removeProgressListener(progressListener)
         currentSession?.remoteMediaClient?.stop()
         currentSession = null
 
