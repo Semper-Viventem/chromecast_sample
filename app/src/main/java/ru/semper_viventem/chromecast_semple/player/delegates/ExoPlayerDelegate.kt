@@ -1,6 +1,7 @@
 package ru.semper_viventem.chromecast_semple.player.delegates
 
 import android.content.Context
+import android.os.Handler
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
 import com.google.android.exoplayer2.source.DynamicConcatenatingMediaSource
@@ -22,11 +23,18 @@ class ExoPlayerDelegate(
     playerCallback: ru.semper_viventem.chromecast_semple.player.Player.PlayerCallback
 ) : PlayingDelegate(playerCallback) {
 
+    companion object {
+        private const val PROGRESS_DELAY_MILLS = 500L
+    }
+
     var simpleExoPlayer: ExtendedSimpleExoPlayer? = null
         private set
 
     private val applicationName: String = context.getString(R.string.app_name)
     private lateinit var playlist: DynamicConcatenatingMediaSource
+
+    private lateinit var checkProgressRunnable: Runnable
+    private val progressHandler = Handler()
 
     // playing delegate
 
@@ -57,6 +65,13 @@ class ExoPlayerDelegate(
             simpleExoPlayer!!.volume = value
         }
 
+    init {
+        checkProgressRunnable = Runnable {
+            playerCallback.onPlayerProgress(positionInMillis)
+            progressHandler.postDelayed(checkProgressRunnable, PROGRESS_DELAY_MILLS)
+        }
+    }
+
     override fun prepare(mediaContent: MediaContent) {
         val extractorsFactory = DefaultExtractorsFactory()
 
@@ -83,27 +98,31 @@ class ExoPlayerDelegate(
     override fun play() {
         if (isLeading) {
             simpleExoPlayer!!.playWhenReady = true
+            startProgressHandler()
         }
     }
 
     override fun pause() {
         if (isLeading) {
             simpleExoPlayer!!.playWhenReady = false
+            stopProgressHandler()
         }
     }
 
     override fun release() {
-        simpleExoPlayer?.let {
-            it.stop()
-            it.release()
-            simpleExoPlayer = null
+        stopProgressHandler()
+        simpleExoPlayer?.apply {
+            stop()
+            release()
         }
+        simpleExoPlayer = null
         getListeners().forEach { it.onReleased() }
     }
 
     override fun netwarkIsRestored() {
-        if (isLeading)
+        if (isLeading) {
             simpleExoPlayer!!.prepare(playlist, false, true)
+        }
     }
 
     override fun onLeading(positionMills: Long, isPlaying: Boolean) {
@@ -117,10 +136,20 @@ class ExoPlayerDelegate(
 
     override fun onDormant() {
         simpleExoPlayer!!.playWhenReady = false
+        stopProgressHandler()
     }
 
     override fun readyForLeading(): Boolean {
         return simpleExoPlayer != null
+    }
+
+    private fun startProgressHandler() {
+        stopProgressHandler()
+        progressHandler.post(checkProgressRunnable)
+    }
+
+    private fun stopProgressHandler() {
+        progressHandler.removeCallbacks(checkProgressRunnable)
     }
 
     private inner class ExoPlayerEventListener : com.google.android.exoplayer2.Player.EventListener {

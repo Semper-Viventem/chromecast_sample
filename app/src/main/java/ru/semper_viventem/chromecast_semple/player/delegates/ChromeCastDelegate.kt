@@ -27,6 +27,7 @@ class ChromeCastDelegate(
     companion object {
         private const val CONTENT_TYPE_VIDEO = "videos/mp4"
         private const val CONTENT_TYPE_AUDIO = "audio/mp3"
+        private const val PROGRESS_DELAY_MILLS = 500L
     }
 
     interface ChromeCastListener {
@@ -49,7 +50,8 @@ class ChromeCastDelegate(
         }
 
         override fun onSessionEnding(session: CastSession) {
-            currentPosition = session.remoteMediaClient?.approximateStreamPosition ?: currentPosition
+            currentPosition = session.remoteMediaClient?.approximateStreamPosition
+                ?: currentPosition
             stopCasting()
         }
 
@@ -95,6 +97,10 @@ class ChromeCastDelegate(
         }
     }
 
+    private val progressListener = RemoteMediaClient.ProgressListener { progressMs, durationMs ->
+        playerCallback.onPlayerProgress(progressMs)
+    }
+
     // Playing delegate
 
     override val isReleased: Boolean = false
@@ -108,7 +114,8 @@ class ChromeCastDelegate(
 
     override var positionInMillis: Long
         get() {
-            currentPosition = currentSession?.remoteMediaClient?.approximateStreamPosition ?: currentPosition
+            currentPosition = currentSession?.remoteMediaClient?.approximateStreamPosition
+                ?: currentPosition
             return currentPosition
         }
         set(value) {
@@ -206,6 +213,7 @@ class ChromeCastDelegate(
             remoteMediaClient.unregisterCallback(castStatusCallback)
             remoteMediaClient.load(mediaInfo, mediaLoadOptions)
             remoteMediaClient.registerCallback(castStatusCallback)
+            remoteMediaClient.addProgressListener(progressListener, PROGRESS_DELAY_MILLS)
         }
     }
 
@@ -214,6 +222,7 @@ class ChromeCastDelegate(
             sessionManager?.removeSessionManagerListener(mediaSessionListener, CastSession::class.java)
         }
         currentSession?.remoteMediaClient?.unregisterCallback(castStatusCallback)
+        currentSession?.remoteMediaClient?.removeProgressListener(progressListener)
         currentSession?.remoteMediaClient?.stop()
         currentSession = null
 
