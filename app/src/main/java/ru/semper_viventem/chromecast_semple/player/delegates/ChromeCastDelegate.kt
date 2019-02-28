@@ -27,6 +27,7 @@ class ChromeCastDelegate(
     companion object {
         private const val CONTENT_TYPE_VIDEO = "videos/mp4"
         private const val CONTENT_TYPE_AUDIO = "audio/mp3"
+        private const val PROGRESS_DELAY_MILLS = 500L
     }
 
     interface ChromeCastListener {
@@ -49,7 +50,8 @@ class ChromeCastDelegate(
         }
 
         override fun onSessionEnding(session: CastSession) {
-            currentPosition = session.remoteMediaClient?.approximateStreamPosition ?: currentPosition
+            currentPosition = session.remoteMediaClient?.approximateStreamPosition
+                ?: currentPosition
             stopCasting()
         }
 
@@ -108,7 +110,8 @@ class ChromeCastDelegate(
 
     override var positionInMillis: Long
         get() {
-            currentPosition = currentSession?.remoteMediaClient?.approximateStreamPosition ?: currentPosition
+            currentPosition = currentSession?.remoteMediaClient?.approximateStreamPosition
+                ?: currentPosition
             return currentPosition
         }
         set(value) {
@@ -206,6 +209,10 @@ class ChromeCastDelegate(
             remoteMediaClient.unregisterCallback(castStatusCallback)
             remoteMediaClient.load(mediaInfo, mediaLoadOptions)
             remoteMediaClient.registerCallback(castStatusCallback)
+            remoteMediaClient.addProgressListener(
+                { progressMs, durationMs -> playerCallback.onPlayerProgress(progressMs) },
+                PROGRESS_DELAY_MILLS
+            )
         }
     }
 
