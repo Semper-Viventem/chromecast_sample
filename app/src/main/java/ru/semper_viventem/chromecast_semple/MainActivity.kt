@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity() {
 
         val mediaContent = MediaContent(
             type = MediaContent.Type.AUDIO,
-            contentUri = Uri.parse("https://download.stream.publicradio.org/podcast/minnesota/classical/programs/free-downloads/2015/09/17/daily_download_20150917_128.mp3"),
+            contentUri = Uri.parse("http://semper-viventem.ru/danse_macabre_metal.mp3"),
             metadata = MediaMetadata(
                 author = "Camille Saint-Saens",
                 title = "Danse macabre",
