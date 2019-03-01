@@ -11,7 +11,7 @@ abstract class PlayingDelegate(
         if (isLeading) {
             onLeading(positionMills, isPlaying)
         } else {
-            onDormant()
+            onIdle()
         }
     }
 
@@ -42,7 +42,7 @@ abstract class PlayingDelegate(
     /**
      * Делегат переведен в состояние бездействия
      */
-    abstract fun onDormant()
+    abstract fun onIdle()
 
     /**
      * Вызывается на этапе инициализации плеера.

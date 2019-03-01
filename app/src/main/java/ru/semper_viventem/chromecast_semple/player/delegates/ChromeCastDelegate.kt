@@ -177,7 +177,7 @@ class ChromeCastDelegate(
         checkAndStartCasting()
     }
 
-    override fun onDormant() {
+    override fun onIdle() {
         // TODO
     }
 

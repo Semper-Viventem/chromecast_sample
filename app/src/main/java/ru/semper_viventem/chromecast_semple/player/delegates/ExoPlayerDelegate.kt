@@ -134,7 +134,7 @@ class ExoPlayerDelegate(
         }
     }
 
-    override fun onDormant() {
+    override fun onIdle() {
         simpleExoPlayer!!.playWhenReady = false
         stopProgressHandler()
     }
