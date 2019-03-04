@@ -17,7 +17,8 @@ class MainPlayerImpl(
         override fun onStartLeading() {
             playingDelegates.forEach {
                 val leadingParams = PlayingDelegate.LeadingParams(mediaContent!!, positionInMillis, duration, isPlaying, speed, volume)
-                it.setIsLeading(it is ChromeCastDelegate, leadingParams)
+                val newLeadingDelegate = playingDelegates.find { it is ChromeCastDelegate }!!
+                setLeadingDelegate(newLeadingDelegate, leadingParams)
             }
         }
 
