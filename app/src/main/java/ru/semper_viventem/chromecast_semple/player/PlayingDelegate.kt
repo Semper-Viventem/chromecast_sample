@@ -2,14 +2,15 @@ package ru.semper_viventem.chromecast_semple.player
 
 abstract class PlayingDelegate(
     protected val playerCallback: Player.PlayerCallback,
-    var isLeading: Boolean = false
+    private val isLeadingProvider: IsLeadingProvider
 ) : Player {
 
-    fun setIsLeading(isLeading: Boolean, positionMills: Long, isPlaying: Boolean) {
-        this.isLeading = isLeading
+    protected var leadingCallback: LeadingCallback? = null
+    protected val isLeading: Boolean get() = isLeadingProvider.isLeading(this)
 
+    fun setIsLeading(isLeading: Boolean, leadingParams: LeadingParams? = null) {
         if (isLeading) {
-            onLeading(positionMills, isPlaying)
+            onLeading(leadingParams)
         } else {
             onIdle()
         }
@@ -27,17 +28,21 @@ abstract class PlayingDelegate(
         return mutableSetOf()
     }
 
+    fun setOnLeadingCallback(leadingCallback: LeadingCallback?) {
+        this.leadingCallback = leadingCallback
+    }
+
     /**
      * Если сеть вернулась
      */
-    open fun netwarkIsRestored() {
+    open fun networkIsRestored() {
         // do nothing
     }
 
     /**
      * Делегат переведен в ведущее состояние
      */
-    abstract fun onLeading(positionMills: Long, isPlaying: Boolean)
+    abstract fun onLeading(leadingParams: LeadingParams?)
 
     /**
      * Делегат переведен в состояние бездействия
@@ -50,4 +55,23 @@ abstract class PlayingDelegate(
      * то плеер может передать эту ответственность ему.
      */
     abstract fun readyForLeading(): Boolean
+
+    data class LeadingParams(
+        val positionMills: Long,
+        val duration: Long,
+        val isPlaying: Boolean,
+        val speed: Float,
+        val volume: Float
+    )
+
+    interface LeadingCallback {
+
+        fun onStartLeading()
+
+        fun onStopLeading(leadingParams: LeadingParams)
+    }
+
+    interface IsLeadingProvider {
+        fun isLeading(playingDelegate: PlayingDelegate): Boolean
+    }
 }

@@ -20,21 +20,14 @@ import timber.log.Timber
 
 class ChromeCastDelegate(
     private val context: Context,
-    private val castCallback: ChromeCastListener,
+    isLeadingProvider: IsLeadingProvider,
     playerCallback: Player.PlayerCallback
-) : PlayingDelegate(playerCallback) {
+) : PlayingDelegate(playerCallback, isLeadingProvider) {
 
     companion object {
         private const val CONTENT_TYPE_VIDEO = "videos/mp4"
         private const val CONTENT_TYPE_AUDIO = "audio/mp3"
         private const val PROGRESS_DELAY_MILLS = 500L
-    }
-
-    interface ChromeCastListener {
-
-        fun onCastStarted()
-
-        fun onCastStopped()
     }
 
     private var sessionManager: SessionManager? = null
@@ -46,7 +39,7 @@ class ChromeCastDelegate(
     private val mediaSessionListener = object : SessionManagerListener<CastSession> {
         override fun onSessionStarted(session: CastSession, sessionId: String) {
             currentSession = session
-            castCallback.onCastStarted()
+            leadingCallback?.onStartLeading()
         }
 
         override fun onSessionEnding(session: CastSession) {
@@ -57,7 +50,7 @@ class ChromeCastDelegate(
 
         override fun onSessionResumed(session: CastSession, wasSuspended: Boolean) {
             currentSession = session
-            castCallback.onCastStarted()
+            leadingCallback?.onStartLeading()
         }
 
         override fun onSessionStartFailed(session: CastSession, p1: Int) {
@@ -151,17 +144,13 @@ class ChromeCastDelegate(
     }
 
     override fun play() {
-        if (isLeading) {
-            currentSession?.remoteMediaClient?.play()
-        }
+        currentSession?.remoteMediaClient?.play()
 
         Timber.d("On play")
     }
 
     override fun pause() {
-        if (isLeading) {
-            currentSession?.remoteMediaClient?.pause()
-        }
+        currentSession?.remoteMediaClient?.pause()
 
         Timber.d("On pause")
     }
@@ -172,8 +161,8 @@ class ChromeCastDelegate(
         Timber.d("On stop")
     }
 
-    override fun onLeading(positionMills: Long, isPlaying: Boolean) {
-        currentPosition = positionMills
+    override fun onLeading(leadingParams: LeadingParams?) {
+        leadingParams?.positionMills?.let { currentPosition = it }
         checkAndStartCasting()
     }
 
@@ -226,8 +215,16 @@ class ChromeCastDelegate(
         currentSession?.remoteMediaClient?.stop()
         currentSession = null
 
+        val leadingParams = LeadingParams(
+            positionInMillis,
+            duration,
+            isPlaying,
+            speed,
+            volume
+        )
+
         if (isLeading) {
-            castCallback.onCastStopped()
+            leadingCallback?.onStopLeading(leadingParams)
         }
     }
 
