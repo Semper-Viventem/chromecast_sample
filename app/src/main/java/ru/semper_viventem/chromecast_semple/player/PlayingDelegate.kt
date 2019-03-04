@@ -57,6 +57,7 @@ abstract class PlayingDelegate(
     abstract fun readyForLeading(): Boolean
 
     data class LeadingParams(
+        val mediaContent: MediaContent,
         val positionMills: Long,
         val duration: Long,
         val isPlaying: Boolean,

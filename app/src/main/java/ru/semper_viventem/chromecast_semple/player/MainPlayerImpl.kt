@@ -16,7 +16,7 @@ class MainPlayerImpl(
 
         override fun onStartLeading() {
             playingDelegates.forEach {
-                val leadingParams = PlayingDelegate.LeadingParams(positionInMillis, duration, isPlaying, speed, volume)
+                val leadingParams = PlayingDelegate.LeadingParams(mediaContent!!, positionInMillis, duration, isPlaying, speed, volume)
                 it.setIsLeading(it is ChromeCastDelegate, leadingParams)
             }
         }
@@ -35,6 +35,7 @@ class MainPlayerImpl(
 
     private val stateListeners = mutableListOf<PlayerStateListener>()
     private val playingDelegates = mutableListOf<PlayingDelegate>()
+    private var mediaContent: MediaContent? = null
 
     private lateinit var leadingDelegate: PlayingDelegate
 
@@ -99,7 +100,10 @@ class MainPlayerImpl(
         }
     }
 
-    override fun prepare(mediaContent: MediaContent) = currentState.prepare(mediaContent)
+    override fun prepare(mediaContent: MediaContent) {
+        this.mediaContent = mediaContent
+        currentState.prepare(mediaContent)
+    }
 
     override fun play() = currentState.play()
 
@@ -218,7 +222,7 @@ class MainPlayerImpl(
         init {
             Timber.d("prepare uri: " + mediaContent.contentUri.toString())
 
-            playingDelegates.forEach { it.prepare(mediaContent) }
+            leadingDelegate.prepare(mediaContent)
 
             stateListeners.forEach { it.onPrepared(mediaContent) }
         }

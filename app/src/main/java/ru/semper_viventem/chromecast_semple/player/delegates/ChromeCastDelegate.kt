@@ -216,6 +216,7 @@ class ChromeCastDelegate(
         currentSession = null
 
         val leadingParams = LeadingParams(
+            mediaContent!!,
             positionInMillis,
             duration,
             isPlaying,
