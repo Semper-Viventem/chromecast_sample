@@ -165,7 +165,7 @@ class ChromeCastDelegate(
 
     override fun onLeading(leadingParams: LeadingParams?) {
         leadingParams?.let {
-            mediaContent = it.mediaContent
+            prepare(it.mediaContent)
             currentPosition = it.positionMills
         }
         checkAndStartCasting()
@@ -215,10 +215,6 @@ class ChromeCastDelegate(
         if (removeListener) {
             sessionManager?.removeSessionManagerListener(mediaSessionListener, CastSession::class.java)
         }
-        currentSession?.remoteMediaClient?.unregisterCallback(castStatusCallback)
-        currentSession?.remoteMediaClient?.removeProgressListener(progressListener)
-        currentSession?.remoteMediaClient?.stop()
-        currentSession = null
 
         val leadingParams = LeadingParams(
             mediaContent!!,
@@ -228,6 +224,11 @@ class ChromeCastDelegate(
             speed,
             volume
         )
+
+        currentSession?.remoteMediaClient?.unregisterCallback(castStatusCallback)
+        currentSession?.remoteMediaClient?.removeProgressListener(progressListener)
+        currentSession?.remoteMediaClient?.stop()
+        currentSession = null
 
         if (isLeading) {
             leadingCallback?.onStopLeading(leadingParams)
