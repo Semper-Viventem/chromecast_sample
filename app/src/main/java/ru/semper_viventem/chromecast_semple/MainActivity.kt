@@ -119,7 +119,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         player?.release()
-        player?.removeListener(playerCallback)
         player = null
         super.onDestroy()
     }
