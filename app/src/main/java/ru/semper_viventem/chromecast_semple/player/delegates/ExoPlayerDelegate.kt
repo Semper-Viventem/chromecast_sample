@@ -20,8 +20,9 @@ import timber.log.Timber
 
 class ExoPlayerDelegate(
     private val context: Context,
+    isLeadingProvider: IsLeadingProvider,
     playerCallback: ru.semper_viventem.chromecast_semple.player.Player.PlayerCallback
-) : PlayingDelegate(playerCallback) {
+) : PlayingDelegate(playerCallback, isLeadingProvider) {
 
     companion object {
         private const val PROGRESS_DELAY_MILLS = 500L
@@ -96,17 +97,13 @@ class ExoPlayerDelegate(
     }
 
     override fun play() {
-        if (isLeading) {
-            simpleExoPlayer!!.playWhenReady = true
-            startProgressHandler()
-        }
+        simpleExoPlayer!!.playWhenReady = true
+        startProgressHandler()
     }
 
     override fun pause() {
-        if (isLeading) {
-            simpleExoPlayer!!.playWhenReady = false
-            stopProgressHandler()
-        }
+        simpleExoPlayer!!.playWhenReady = false
+        stopProgressHandler()
     }
 
     override fun release() {
@@ -117,17 +114,22 @@ class ExoPlayerDelegate(
         }
         simpleExoPlayer = null
         getListeners().forEach { it.onReleased() }
+        setOnLeadingCallback(null)
     }
 
-    override fun netwarkIsRestored() {
-        if (isLeading) {
-            simpleExoPlayer!!.prepare(playlist, false, true)
+    override fun networkIsRestored() {
+        simpleExoPlayer!!.prepare(playlist, false, true)
+    }
+
+    override fun onLeading(leadingParams: LeadingParams?) {
+        if (leadingParams == null) return
+
+        if (simpleExoPlayer == null) {
+            prepare(leadingParams.mediaContent)
         }
-    }
 
-    override fun onLeading(positionMills: Long, isPlaying: Boolean) {
-        this.positionInMillis = positionInMillis
-        if (isPlaying) {
+        this.positionInMillis = leadingParams.positionMills
+        if (leadingParams.isPlaying) {
             play()
         } else {
             pause()
@@ -135,12 +137,12 @@ class ExoPlayerDelegate(
     }
 
     override fun onIdle() {
-        simpleExoPlayer!!.playWhenReady = false
+        simpleExoPlayer?.playWhenReady = false
         stopProgressHandler()
     }
 
     override fun readyForLeading(): Boolean {
-        return simpleExoPlayer != null
+        return true
     }
 
     private fun startProgressHandler() {

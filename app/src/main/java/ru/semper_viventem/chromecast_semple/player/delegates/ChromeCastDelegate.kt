@@ -19,22 +19,15 @@ import ru.semper_viventem.chromecast_semple.player.SpeedProvider
 import timber.log.Timber
 
 class ChromeCastDelegate(
-    private val context: Context,
-    private val castCallback: ChromeCastListener,
+    context: Context,
+    isLeadingProvider: IsLeadingProvider,
     playerCallback: Player.PlayerCallback
-) : PlayingDelegate(playerCallback) {
+) : PlayingDelegate(playerCallback, isLeadingProvider) {
 
     companion object {
         private const val CONTENT_TYPE_VIDEO = "videos/mp4"
         private const val CONTENT_TYPE_AUDIO = "audio/mp3"
         private const val PROGRESS_DELAY_MILLS = 500L
-    }
-
-    interface ChromeCastListener {
-
-        fun onCastStarted()
-
-        fun onCastStopped()
     }
 
     private var sessionManager: SessionManager? = null
@@ -46,7 +39,7 @@ class ChromeCastDelegate(
     private val mediaSessionListener = object : SessionManagerListener<CastSession> {
         override fun onSessionStarted(session: CastSession, sessionId: String) {
             currentSession = session
-            castCallback.onCastStarted()
+            leadingCallback?.onStartLeading()
         }
 
         override fun onSessionEnding(session: CastSession) {
@@ -57,7 +50,7 @@ class ChromeCastDelegate(
 
         override fun onSessionResumed(session: CastSession, wasSuspended: Boolean) {
             currentSession = session
-            castCallback.onCastStarted()
+            leadingCallback?.onStartLeading()
         }
 
         override fun onSessionStartFailed(session: CastSession, p1: Int) {
@@ -137,11 +130,13 @@ class ChromeCastDelegate(
             currentSession?.volume = value.toDouble()
         }
 
-    override fun prepare(mediaContent: MediaContent) {
-
+    init {
         sessionManager = CastContext.getSharedInstance(context).sessionManager
         sessionManager?.addSessionManagerListener(mediaSessionListener, CastSession::class.java)
         currentSession = sessionManager?.currentCastSession
+    }
+
+    override fun prepare(mediaContent: MediaContent) {
 
         this.mediaContent = mediaContent
 
@@ -151,29 +146,29 @@ class ChromeCastDelegate(
     }
 
     override fun play() {
-        if (isLeading) {
-            currentSession?.remoteMediaClient?.play()
-        }
+        currentSession?.remoteMediaClient?.play()
 
         Timber.d("On play")
     }
 
     override fun pause() {
-        if (isLeading) {
-            currentSession?.remoteMediaClient?.pause()
-        }
+        currentSession?.remoteMediaClient?.pause()
 
         Timber.d("On pause")
     }
 
     override fun release() {
+        setOnLeadingCallback(null)
         stopCasting(true)
 
         Timber.d("On stop")
     }
 
-    override fun onLeading(positionMills: Long, isPlaying: Boolean) {
-        currentPosition = positionMills
+    override fun onLeading(leadingParams: LeadingParams?) {
+        leadingParams?.let {
+            prepare(it.mediaContent)
+            currentPosition = it.positionMills
+        }
         checkAndStartCasting()
     }
 
@@ -218,16 +213,27 @@ class ChromeCastDelegate(
     }
 
     private fun stopCasting(removeListener: Boolean = false) {
+
+        val leadingParams = LeadingParams(
+            mediaContent!!,
+            positionInMillis,
+            duration,
+            isPlaying,
+            speed,
+            volume
+        )
+
         if (removeListener) {
             sessionManager?.removeSessionManagerListener(mediaSessionListener, CastSession::class.java)
         }
+
         currentSession?.remoteMediaClient?.unregisterCallback(castStatusCallback)
         currentSession?.remoteMediaClient?.removeProgressListener(progressListener)
         currentSession?.remoteMediaClient?.stop()
         currentSession = null
 
         if (isLeading) {
-            castCallback.onCastStopped()
+            leadingCallback?.onStopLeading(leadingParams)
         }
     }
 

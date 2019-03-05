@@ -12,28 +12,36 @@ class MainPlayerImpl(
     mediaSession: MediaSessionCompat
 ) : Player {
 
-    private val castCallback = object : ChromeCastDelegate.ChromeCastListener {
+    private val chromeCastLeadingCallback = object : PlayingDelegate.LeadingCallback {
 
-        override fun onCastStarted() {
-            val playing = currentState is Playing
-            playingDelegates.forEach {
-                it.setIsLeading(it is ChromeCastDelegate, positionInMillis, playing)
+        override fun onStartLeading() {
+            val leadingParams = if (currentState !is Empty) {
+                PlayingDelegate.LeadingParams(mediaContent!!, positionInMillis, duration, isPlaying, speed, volume)
+            } else {
+                null
             }
+
+            val newLeadingDelegate = playingDelegates.find { it is ChromeCastDelegate }!!
+            setLeadingDelegate(newLeadingDelegate, leadingParams)
         }
 
-        override fun onCastStopped() {
-            val playing = currentState is Playing
-            playingDelegates.forEach {
-                it.setIsLeading(it is ExoPlayerDelegate, positionInMillis, playing)
-            }
+        override fun onStopLeading(leadingParams: PlayingDelegate.LeadingParams) {
+            val newLeadingDelegate = playingDelegates.find { it is ExoPlayerDelegate }!!
+            setLeadingDelegate(newLeadingDelegate, leadingParams)
+        }
+    }
+
+    private val isLeadingProvider = object : PlayingDelegate.IsLeadingProvider {
+        override fun isLeading(playingDelegate: PlayingDelegate): Boolean {
+            return playingDelegate::class.java == leadingDelegate::class.java
         }
     }
 
     private val stateListeners = mutableListOf<PlayerStateListener>()
     private val playingDelegates = mutableListOf<PlayingDelegate>()
+    private var mediaContent: MediaContent? = null
 
-    private val leadingDelegate: PlayingDelegate
-        get() = playingDelegates.firstOrNull { it.isLeading } ?: playingDelegates.first()
+    private lateinit var leadingDelegate: PlayingDelegate
 
     private var currentState: State = Empty()
         set(value) {
@@ -73,20 +81,32 @@ class MainPlayerImpl(
         val playerCallbackInternal = PlayerCallbackInternal()
 
         val mediaSessionListener = MediaSessionListener(context, mediaSession)
-        val chromeCastDelegate = ChromeCastDelegate(context, castCallback, playerCallbackInternal)
-        val exoPlayerDelegate = ExoPlayerDelegate(context, playerCallbackInternal)
+        val chromeCastDelegate = ChromeCastDelegate(context, isLeadingProvider, playerCallbackInternal).apply {
+            setOnLeadingCallback(chromeCastLeadingCallback)
+        }
+        val exoPlayerDelegate = ExoPlayerDelegate(context, isLeadingProvider, playerCallbackInternal)
 
         with(stateListeners) {
             add(mediaSessionListener)
         }
 
         with(playingDelegates) {
-            add(chromeCastDelegate)
             add(exoPlayerDelegate)
+            add(chromeCastDelegate)
+        }
+
+        playingDelegates.forEach {
+            if (it.readyForLeading()) {
+                setLeadingDelegate(it)
+                return@forEach
+            }
         }
     }
 
-    override fun prepare(mediaContent: MediaContent) = currentState.prepare(mediaContent)
+    override fun prepare(mediaContent: MediaContent) {
+        this.mediaContent = mediaContent
+        currentState.prepare(mediaContent)
+    }
 
     override fun play() = currentState.play()
 
@@ -124,6 +144,13 @@ class MainPlayerImpl(
                 listener.onPaused(currentState.positionInMillis)
         } catch (exception: IllegalStateException) {
             Timber.i("Can't notify listener. Player not initialized yet.")
+        }
+    }
+
+    private fun setLeadingDelegate(delegate: PlayingDelegate, leadingParams: PlayingDelegate.LeadingParams? = null) {
+        leadingDelegate = delegate
+        playingDelegates.forEach {
+            it.setIsLeading(it::class.java == delegate::class.java, leadingParams)
         }
     }
 
@@ -170,8 +197,10 @@ class MainPlayerImpl(
         fun release() {
             Timber.d("release")
             playingDelegates.forEach { it.release() }
+            playingDelegates.clear()
             currentState = Empty()
             stateListeners.forEach { it.onStop() }
+            stateListeners.clear()
         }
 
         fun waitingNetwork() {
@@ -198,14 +227,7 @@ class MainPlayerImpl(
         init {
             Timber.d("prepare uri: " + mediaContent.contentUri.toString())
 
-            playingDelegates.forEach { it.prepare(mediaContent) }
-
-            playingDelegates.forEach {
-                if (it.readyForLeading()) {
-                    it.isLeading = true
-                    return@forEach
-                }
-            }
+            leadingDelegate.prepare(mediaContent)
 
             stateListeners.forEach { it.onPrepared(mediaContent) }
         }
@@ -241,7 +263,7 @@ class MainPlayerImpl(
         override var positionInMillis: Long
             get() = leadingDelegate.positionInMillis
             set(value) {
-                playingDelegates.forEach { it.positionInMillis = value }
+                leadingDelegate.positionInMillis = value
             }
 
         override val duration
@@ -252,14 +274,14 @@ class MainPlayerImpl(
         override var volume
             get() = leadingDelegate.volume
             set(value) {
-                playingDelegates.forEach { it.volume = value }
+                leadingDelegate.volume = value
             }
 
         override var speed: Float
             get() = leadingDelegate.speed
             set(value) {
                 Timber.d("Speed selected: $value")
-                playingDelegates.forEach { it.speed = value }
+                leadingDelegate.speed = value
             }
 
         init {
@@ -292,7 +314,7 @@ class MainPlayerImpl(
         override var positionInMillis: Long
             get() = leadingDelegate.positionInMillis
             set(value) {
-                playingDelegates.forEach { it.positionInMillis = value }
+                leadingDelegate.positionInMillis = value
             }
 
         override val duration
@@ -302,7 +324,7 @@ class MainPlayerImpl(
             get() = leadingDelegate.speed
             set(value) {
                 Timber.d("Speed selected: $value")
-                playingDelegates.forEach { it.speed = value }
+                leadingDelegate.speed = value
             }
 
         override val isReleased = false
@@ -310,7 +332,7 @@ class MainPlayerImpl(
         override var volume
             get() = leadingDelegate.volume
             set(value) {
-                playingDelegates.forEach { it.volume = value }
+                leadingDelegate.volume = value
             }
 
         init {
@@ -338,7 +360,7 @@ class MainPlayerImpl(
         override var positionInMillis: Long
             get() = leadingDelegate.positionInMillis
             set(value) {
-                playingDelegates.forEach { it.positionInMillis = value }
+                leadingDelegate.positionInMillis = value
             }
 
         override val duration
@@ -348,7 +370,7 @@ class MainPlayerImpl(
             get() = leadingDelegate.speed
             set(value) {
                 Timber.d("Speed selected: $value")
-                playingDelegates.forEach { it.speed = value }
+                leadingDelegate.speed = value
             }
 
         override val isReleased = false
@@ -356,7 +378,7 @@ class MainPlayerImpl(
         override var volume
             get() = leadingDelegate.volume
             set(value) {
-                playingDelegates.forEach { it.volume = value }
+                leadingDelegate.volume = value
             }
 
         init {
@@ -387,7 +409,7 @@ class MainPlayerImpl(
         override var positionInMillis: Long
             get() = leadingDelegate.positionInMillis
             set(value) {
-                playingDelegates.forEach { it.positionInMillis = value }
+                leadingDelegate.positionInMillis = value
             }
 
         override val duration
@@ -396,14 +418,14 @@ class MainPlayerImpl(
         override var volume
             get() = leadingDelegate.volume
             set(value) {
-                playingDelegates.forEach { it.volume = value }
+                leadingDelegate.volume = value
             }
 
         override var speed: Float
             get() = leadingDelegate.speed
             set(value) {
                 Timber.d("Speed selected: $value")
-                playingDelegates.forEach { it.speed = value }
+                leadingDelegate.speed = value
             }
 
         override val isReleased = false
@@ -450,7 +472,7 @@ class MainPlayerImpl(
         override var positionInMillis: Long
             get() = leadingDelegate.positionInMillis
             set(value) {
-                playingDelegates.forEach { it.positionInMillis = value }
+                leadingDelegate.positionInMillis = value
             }
 
         override val duration
