@@ -141,7 +141,7 @@ class ExoPlayerDelegate(
     }
 
     override fun readyForLeading(): Boolean {
-        return simpleExoPlayer != null
+        return true
     }
 
     private fun startProgressHandler() {

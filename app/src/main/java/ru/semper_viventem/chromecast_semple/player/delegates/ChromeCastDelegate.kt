@@ -212,9 +212,6 @@ class ChromeCastDelegate(
     }
 
     private fun stopCasting(removeListener: Boolean = false) {
-        if (removeListener) {
-            sessionManager?.removeSessionManagerListener(mediaSessionListener, CastSession::class.java)
-        }
 
         val leadingParams = LeadingParams(
             mediaContent!!,
@@ -224,6 +221,10 @@ class ChromeCastDelegate(
             speed,
             volume
         )
+
+        if (removeListener) {
+            sessionManager?.removeSessionManagerListener(mediaSessionListener, CastSession::class.java)
+        }
 
         currentSession?.remoteMediaClient?.unregisterCallback(castStatusCallback)
         currentSession?.remoteMediaClient?.removeProgressListener(progressListener)

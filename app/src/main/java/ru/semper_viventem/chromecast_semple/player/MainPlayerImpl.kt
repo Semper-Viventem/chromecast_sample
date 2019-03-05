@@ -26,8 +26,10 @@ class MainPlayerImpl(
         }
 
         override fun onStopLeading(leadingParams: PlayingDelegate.LeadingParams) {
-            val newLeadingDelegate = playingDelegates.find { it is ExoPlayerDelegate }!!
-            setLeadingDelegate(newLeadingDelegate, leadingParams)
+            if (!isReleased) {
+                val newLeadingDelegate = playingDelegates.find { it is ExoPlayerDelegate }!!
+                setLeadingDelegate(newLeadingDelegate, leadingParams)
+            }
         }
     }
 
@@ -95,7 +97,6 @@ class MainPlayerImpl(
             add(chromeCastDelegate)
         }
 
-        setLeadingDelegate(playingDelegates.first())
         playingDelegates.forEach {
             if (it.readyForLeading()) {
                 setLeadingDelegate(it)
