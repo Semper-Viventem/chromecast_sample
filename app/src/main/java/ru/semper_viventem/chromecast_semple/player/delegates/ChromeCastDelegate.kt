@@ -19,7 +19,7 @@ import ru.semper_viventem.chromecast_semple.player.SpeedProvider
 import timber.log.Timber
 
 class ChromeCastDelegate(
-    private val context: Context,
+    context: Context,
     isLeadingProvider: IsLeadingProvider,
     playerCallback: Player.PlayerCallback
 ) : PlayingDelegate(playerCallback, isLeadingProvider) {
