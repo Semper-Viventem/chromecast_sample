@@ -114,6 +114,7 @@ class ExoPlayerDelegate(
         }
         simpleExoPlayer = null
         getListeners().forEach { it.onReleased() }
+        setOnLeadingCallback(null)
     }
 
     override fun networkIsRestored() {

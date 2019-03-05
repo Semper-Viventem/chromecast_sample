@@ -26,10 +26,8 @@ class MainPlayerImpl(
         }
 
         override fun onStopLeading(leadingParams: PlayingDelegate.LeadingParams) {
-            if (!isReleased) {
-                val newLeadingDelegate = playingDelegates.find { it is ExoPlayerDelegate }!!
-                setLeadingDelegate(newLeadingDelegate, leadingParams)
-            }
+            val newLeadingDelegate = playingDelegates.find { it is ExoPlayerDelegate }!!
+            setLeadingDelegate(newLeadingDelegate, leadingParams)
         }
     }
 
@@ -199,8 +197,10 @@ class MainPlayerImpl(
         fun release() {
             Timber.d("release")
             playingDelegates.forEach { it.release() }
+            playingDelegates.clear()
             currentState = Empty()
             stateListeners.forEach { it.onStop() }
+            stateListeners.clear()
         }
 
         fun waitingNetwork() {

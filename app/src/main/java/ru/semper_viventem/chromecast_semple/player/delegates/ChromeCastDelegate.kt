@@ -158,6 +158,7 @@ class ChromeCastDelegate(
     }
 
     override fun release() {
+        setOnLeadingCallback(null)
         stopCasting(true)
 
         Timber.d("On stop")

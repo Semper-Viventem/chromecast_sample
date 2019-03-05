@@ -21,7 +21,8 @@ class MainActivity : AppCompatActivity() {
         private const val MEDIA_SESSION_TAG = "media_session_audio"
     }
 
-    private lateinit var player: Player
+    private var player: Player? = null
+    private lateinit var mediaSession: MediaSessionCompat
 
     private val playerCallback = object : Player.PlayerCallback {
         override fun onPlaying(currentPosition: Long) {
@@ -76,11 +77,11 @@ class MainActivity : AppCompatActivity() {
 
     private val mediaSessionCallback = object: MediaSessionCompat.Callback() {
         override fun onPlay() {
-            player.play()
+            player!!.play()
         }
 
         override fun onPause() {
-            player.pause()
+            player!!.pause()
         }
     }
 
@@ -104,39 +105,57 @@ class MainActivity : AppCompatActivity() {
         prepare(mediaContent)
     }
 
+    override fun onResume() {
+        super.onResume()
+        mediaSession.setCallback(mediaSessionCallback)
+        player!!.addListener(playerCallback)
+    }
+
+    override fun onPause() {
+        mediaSession.setCallback(null)
+        player!!.removeListener(playerCallback)
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        player?.release()
+        player?.removeListener(playerCallback)
+        player = null
+        super.onDestroy()
+    }
+
     private fun initPlayer() {
-        val mediaSession = MediaSessionCompat(this, MEDIA_SESSION_TAG).apply {
-            setCallback(mediaSessionCallback)
-        }
+        mediaSession = MediaSessionCompat(this, MEDIA_SESSION_TAG)
 
         player = MainPlayerImpl(this, mediaSession)
-        player.addListener(playerCallback)
         CastButtonFactory.setUpMediaRouteButton(applicationContext, mediaRouterButton)
     }
 
     private fun initUi() {
+        if (player == null) throw IllegalStateException("Player must be initialized!")
+
         playButton.setOnClickListener {
-            if (player.isPlaying) {
-                player.pause()
+            if (player!!.isPlaying) {
+                player!!.pause()
             } else {
-                player.play()
+                player!!.play()
             }
         }
 
         forwardButton.setOnClickListener {
-            val newTime = player.positionInMillis + FORWARD_TIME
-            player.positionInMillis = if (newTime > player.duration) player.duration else newTime
+            val newTime = player!!.positionInMillis + FORWARD_TIME
+            player!!.positionInMillis = if (newTime > player!!.duration) player!!.duration else newTime
         }
 
         rewindButton.setOnClickListener {
-            val newTime = player.positionInMillis - REWIND_TIME
-            player.positionInMillis = if (newTime < 0) 0 else newTime
+            val newTime = player!!.positionInMillis - REWIND_TIME
+            player!!.positionInMillis = if (newTime < 0) 0 else newTime
         }
 
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
-                    player.positionInMillis = progress.toLong()
+                    player!!.positionInMillis = progress.toLong()
                 }
             }
 
@@ -152,6 +171,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun prepare(mediaContent: MediaContent) {
+        if (player == null) throw IllegalStateException("Player must be initialized!")
 
         toolbar.title = mediaContent.metadata?.title
         toolbar.subtitle = mediaContent.metadata?.author
@@ -160,6 +180,6 @@ class MainActivity : AppCompatActivity() {
             .load(mediaContent.metadata?.posterUrl)
             .into(albumImage)
 
-        player.prepare(mediaContent)
+        player!!.prepare(mediaContent)
     }
 }
