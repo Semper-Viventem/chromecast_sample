@@ -122,6 +122,11 @@ class ExoPlayerDelegate(
 
     override fun onLeading(leadingParams: LeadingParams?) {
         if (leadingParams == null) return
+
+        if (simpleExoPlayer == null) {
+            prepare(leadingParams.mediaContent)
+        }
+
         this.positionInMillis = leadingParams.positionMills
         if (leadingParams.isPlaying) {
             play()

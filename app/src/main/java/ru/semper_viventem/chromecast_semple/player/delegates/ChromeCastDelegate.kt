@@ -130,11 +130,13 @@ class ChromeCastDelegate(
             currentSession?.volume = value.toDouble()
         }
 
-    override fun prepare(mediaContent: MediaContent) {
-
+    init {
         sessionManager = CastContext.getSharedInstance(context).sessionManager
         sessionManager?.addSessionManagerListener(mediaSessionListener, CastSession::class.java)
         currentSession = sessionManager?.currentCastSession
+    }
+
+    override fun prepare(mediaContent: MediaContent) {
 
         this.mediaContent = mediaContent
 
@@ -162,7 +164,10 @@ class ChromeCastDelegate(
     }
 
     override fun onLeading(leadingParams: LeadingParams?) {
-        leadingParams?.positionMills?.let { currentPosition = it }
+        leadingParams?.let {
+            mediaContent = it.mediaContent
+            currentPosition = it.positionMills
+        }
         checkAndStartCasting()
     }
 

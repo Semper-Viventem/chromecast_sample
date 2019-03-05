@@ -15,11 +15,14 @@ class MainPlayerImpl(
     private val chromeCastLeadingCallback = object : PlayingDelegate.LeadingCallback {
 
         override fun onStartLeading() {
-            playingDelegates.forEach {
-                val leadingParams = PlayingDelegate.LeadingParams(mediaContent!!, positionInMillis, duration, isPlaying, speed, volume)
-                val newLeadingDelegate = playingDelegates.find { it is ChromeCastDelegate }!!
-                setLeadingDelegate(newLeadingDelegate, leadingParams)
+            val leadingParams = if (currentState !is Empty) {
+                PlayingDelegate.LeadingParams(mediaContent!!, positionInMillis, duration, isPlaying, speed, volume)
+            } else {
+                null
             }
+
+            val newLeadingDelegate = playingDelegates.find { it is ChromeCastDelegate }!!
+            setLeadingDelegate(newLeadingDelegate, leadingParams)
         }
 
         override fun onStopLeading(leadingParams: PlayingDelegate.LeadingParams) {
