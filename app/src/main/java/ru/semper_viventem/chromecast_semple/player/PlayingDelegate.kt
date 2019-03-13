@@ -36,7 +36,7 @@ abstract class PlayingDelegate : Player {
         return mutableSetOf()
     }
 
-    final fun attache(
+    fun attache(
         leadingCallback: LeadingCallback,
         playerCallback: Player.PlayerCallback,
         isLeadingProvider: IsLeadingProvider
@@ -47,7 +47,7 @@ abstract class PlayingDelegate : Player {
         isAttached = true
     }
 
-    final fun detache() {
+    fun detach() {
         isAttached = false
         leadingCallback = null
         playerCallback = null
