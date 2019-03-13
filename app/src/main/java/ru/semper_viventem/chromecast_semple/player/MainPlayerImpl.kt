@@ -7,30 +7,6 @@ class MainPlayerImpl(
     playingDelegates: List<PlayingDelegate>
 ) : Player {
 
-    private val leadingCallback = object : PlayingDelegate.LeadingCallback {
-
-        override fun onStartLeading(delegate: PlayingDelegate) {
-            val leadingParams = if (currentState !is Empty) {
-                PlayingDelegate.LeadingParams(mediaContent!!, positionInMillis, duration, isPlaying, speed, volume)
-            } else {
-                null
-            }
-
-            val newLeadingDelegate = playingDelegates.find { it::class.java == delegate::class.java }!!
-            setLeadingDelegate(newLeadingDelegate, leadingParams)
-        }
-
-        override fun onStopLeading(delegate: PlayingDelegate, leadingParams: PlayingDelegate.LeadingParams) {
-            selectLeadingDelegate(leadingParams)
-        }
-    }
-
-    private val isLeadingProvider = object : PlayingDelegate.IsLeadingProvider {
-        override fun isLeading(playingDelegate: PlayingDelegate): Boolean {
-            return playingDelegate::class.java == leadingDelegate::class.java
-        }
-    }
-
     private var mediaContent: MediaContent? = null
 
     private val stateListeners = mutableListOf<PlayerStateListener>()
@@ -48,6 +24,8 @@ class MainPlayerImpl(
 
     init {
         val playerCallbackInternal = PlayerCallbackInternal()
+        val leadingCallback = LeadingCallback()
+        val isLeadingProvider = IsLeadingProvider()
 
         this.stateListeners.addAll(stateListeners)
         this.playingDelegates.addAll(playingDelegates)
@@ -143,6 +121,83 @@ class MainPlayerImpl(
         leadingDelegate = delegate
         playingDelegates.forEach {
             it.setIsLeading(it::class.java == delegate::class.java, leadingParams)
+        }
+    }
+
+    // internal player listeners
+
+    private inner class PlayerCallbackInternal : Player.PlayerCallback {
+
+        override fun onPlaying(currentPosition: Long) {
+            currentState.play()
+        }
+
+        override fun onPaused(currentPosition: Long) {
+            currentState.pause()
+        }
+
+        override fun onPrepared() {
+            currentState.prepared()
+        }
+
+        override fun onWaitingForNetwork() {
+            currentState.waitingNetwork()
+        }
+
+        override fun onError(error: String?) {
+            currentState.error(error)
+        }
+
+        override fun onReleased() {
+            currentState.release()
+        }
+
+        override fun onLoadingChanged(isLoading: Boolean) {
+            listeners.forEach { it.onLoadingChanged(isLoading) }
+        }
+
+        override fun onDurationChanged(duration: Long) {
+            listeners.forEach { it.onDurationChanged(duration) }
+        }
+
+        override fun onSetSpeed(speed: Float) {
+            listeners.forEach { it.onSetSpeed(speed) }
+        }
+
+        override fun onSeekTo(fromTimeInMillis: Long, toTimeInMillis: Long) {
+            listeners.forEach { it.onSeekTo(fromTimeInMillis, toTimeInMillis) }
+        }
+
+        override fun onPlayerProgress(currentPosition: Long) {
+            listeners.forEach { it.onPlayerProgress(currentPosition) }
+        }
+
+        override fun onPreparing() {
+            // do nothing
+        }
+    }
+
+    private inner class LeadingCallback : PlayingDelegate.LeadingCallback {
+
+        override fun onStartLeading(delegate: PlayingDelegate) {
+            val leadingParams = if (currentState !is Empty) {
+                PlayingDelegate.LeadingParams(mediaContent!!, positionInMillis, duration, isPlaying, speed, volume)
+            } else {
+                null
+            }
+
+            val newLeadingDelegate = playingDelegates.find { it::class.java == delegate::class.java }!!
+            setLeadingDelegate(newLeadingDelegate, leadingParams)
+        }
+
+        override fun onStopLeading(delegate: PlayingDelegate, leadingParams: PlayingDelegate.LeadingParams) {
+            selectLeadingDelegate(leadingParams)
+        }
+    }
+
+    private inner class IsLeadingProvider : PlayingDelegate.IsLeadingProvider {
+        override fun isLeading(playingDelegate: PlayingDelegate): Boolean {
+            return playingDelegate::class.java == leadingDelegate::class.java
         }
     }
 
@@ -487,58 +542,5 @@ class MainPlayerImpl(
         }
 
         override fun notifyListeners() = listeners.forEach { it.onError(error) }
-    }
-
-    //endregion player states
-
-    private inner class PlayerCallbackInternal : Player.PlayerCallback {
-
-        override fun onPlaying(currentPosition: Long) {
-            currentState.play()
-        }
-
-        override fun onPaused(currentPosition: Long) {
-            currentState.pause()
-        }
-
-        override fun onPrepared() {
-            currentState.prepared()
-        }
-
-        override fun onWaitingForNetwork() {
-            currentState.waitingNetwork()
-        }
-
-        override fun onError(error: String?) {
-            currentState.error(error)
-        }
-
-        override fun onReleased() {
-            currentState.release()
-        }
-
-        override fun onLoadingChanged(isLoading: Boolean) {
-            listeners.forEach { it.onLoadingChanged(isLoading) }
-        }
-
-        override fun onDurationChanged(duration: Long) {
-            listeners.forEach { it.onDurationChanged(duration) }
-        }
-
-        override fun onSetSpeed(speed: Float) {
-            listeners.forEach { it.onSetSpeed(speed) }
-        }
-
-        override fun onSeekTo(fromTimeInMillis: Long, toTimeInMillis: Long) {
-            listeners.forEach { it.onSeekTo(fromTimeInMillis, toTimeInMillis) }
-        }
-
-        override fun onPlayerProgress(currentPosition: Long) {
-            listeners.forEach { it.onPlayerProgress(currentPosition) }
-        }
-
-        override fun onPreparing() {
-            // do nothing
-        }
     }
 }
