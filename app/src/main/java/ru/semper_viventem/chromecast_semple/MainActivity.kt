@@ -12,6 +12,9 @@ import ru.semper_viventem.chromecast_semple.player.MainPlayerImpl
 import ru.semper_viventem.chromecast_semple.player.MediaContent
 import ru.semper_viventem.chromecast_semple.player.MediaMetadata
 import ru.semper_viventem.chromecast_semple.player.Player
+import ru.semper_viventem.chromecast_semple.player.delegates.ChromeCastDelegate
+import ru.semper_viventem.chromecast_semple.player.delegates.ExoPlayerDelegate
+import ru.semper_viventem.chromecast_semple.player.delegates.MediaSessionListener
 
 class MainActivity : AppCompatActivity() {
 
@@ -126,7 +129,14 @@ class MainActivity : AppCompatActivity() {
     private fun initPlayer() {
         mediaSession = MediaSessionCompat(this, MEDIA_SESSION_TAG)
 
-        player = MainPlayerImpl(this, mediaSession)
+        val chromeCastDelegate = ChromeCastDelegate(this)
+        val exoPlayerDelegate = ExoPlayerDelegate(this)
+        val mediaSessionListener = MediaSessionListener(this, mediaSession)
+
+        player = MainPlayerImpl(
+            listOf(mediaSessionListener),
+            listOf(exoPlayerDelegate, chromeCastDelegate)
+        )
         CastButtonFactory.setUpMediaRouteButton(applicationContext, mediaRouterButton)
     }
 

@@ -13,16 +13,13 @@ import com.google.android.gms.cast.framework.SessionManagerListener
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.android.gms.common.images.WebImage
 import ru.semper_viventem.chromecast_semple.player.MediaContent
-import ru.semper_viventem.chromecast_semple.player.Player
 import ru.semper_viventem.chromecast_semple.player.PlayingDelegate
 import ru.semper_viventem.chromecast_semple.player.SpeedProvider
 import timber.log.Timber
 
 class ChromeCastDelegate(
-    context: Context,
-    isLeadingProvider: IsLeadingProvider,
-    playerCallback: Player.PlayerCallback
-) : PlayingDelegate(playerCallback, isLeadingProvider) {
+    context: Context
+) : PlayingDelegate() {
 
     companion object {
         private const val CONTENT_TYPE_VIDEO = "videos/mp4"
@@ -39,7 +36,7 @@ class ChromeCastDelegate(
     private val mediaSessionListener = object : SessionManagerListener<CastSession> {
         override fun onSessionStarted(session: CastSession, sessionId: String) {
             currentSession = session
-            leadingCallback?.onStartLeading()
+            leadingCallback?.onStartLeading(this@ChromeCastDelegate)
         }
 
         override fun onSessionEnding(session: CastSession) {
@@ -50,7 +47,7 @@ class ChromeCastDelegate(
 
         override fun onSessionResumed(session: CastSession, wasSuspended: Boolean) {
             currentSession = session
-            leadingCallback?.onStartLeading()
+            leadingCallback?.onStartLeading(this@ChromeCastDelegate)
         }
 
         override fun onSessionStartFailed(session: CastSession, p1: Int) {
@@ -84,14 +81,14 @@ class ChromeCastDelegate(
             val playerState = currentSession!!.remoteMediaClient.playerState
 
             when (playerState) {
-                MediaStatus.PLAYER_STATE_PLAYING -> playerCallback.onPlaying(positionInMillis)
-                MediaStatus.PLAYER_STATE_PAUSED -> playerCallback.onPaused(positionInMillis)
+                MediaStatus.PLAYER_STATE_PLAYING -> playerCallback?.onPlaying(positionInMillis)
+                MediaStatus.PLAYER_STATE_PAUSED -> playerCallback?.onPaused(positionInMillis)
             }
         }
     }
 
     private val progressListener = RemoteMediaClient.ProgressListener { progressMs, durationMs ->
-        playerCallback.onPlayerProgress(progressMs)
+        playerCallback?.onPlayerProgress(progressMs)
     }
 
     // Playing delegate
@@ -140,7 +137,7 @@ class ChromeCastDelegate(
 
         this.mediaContent = mediaContent
 
-        playerCallback.onPrepared()
+        playerCallback?.onPrepared()
 
         Timber.d("On prepared")
     }
@@ -158,7 +155,6 @@ class ChromeCastDelegate(
     }
 
     override fun release() {
-        setOnLeadingCallback(null)
         stopCasting(true)
 
         Timber.d("On stop")
@@ -233,7 +229,7 @@ class ChromeCastDelegate(
         currentSession = null
 
         if (isLeading) {
-            leadingCallback?.onStopLeading(leadingParams)
+            leadingCallback?.onStopLeading(this, leadingParams)
         }
     }
 

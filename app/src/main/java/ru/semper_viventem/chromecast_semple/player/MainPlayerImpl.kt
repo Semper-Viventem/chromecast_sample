@@ -1,15 +1,10 @@
 package ru.semper_viventem.chromecast_semple.player
 
-import android.content.Context
-import android.support.v4.media.session.MediaSessionCompat
-import ru.semper_viventem.chromecast_semple.player.delegates.ChromeCastDelegate
-import ru.semper_viventem.chromecast_semple.player.delegates.ExoPlayerDelegate
-import ru.semper_viventem.chromecast_semple.player.delegates.MediaSessionListener
 import timber.log.Timber
 
 class MainPlayerImpl(
-    context: Context,
-    mediaSession: MediaSessionCompat
+    stateListeners: List<PlayerStateListener>,
+    playingDelegates: List<PlayingDelegate>
 ) : Player {
 
     private val leadingCallback = object : PlayingDelegate.LeadingCallback {
@@ -54,19 +49,11 @@ class MainPlayerImpl(
     init {
         val playerCallbackInternal = PlayerCallbackInternal()
 
-        val mediaSessionListener = MediaSessionListener(context, mediaSession)
-        val chromeCastDelegate = ChromeCastDelegate(context, isLeadingProvider, playerCallbackInternal).apply {
-            setOnLeadingCallback(leadingCallback)
-        }
-        val exoPlayerDelegate = ExoPlayerDelegate(context, isLeadingProvider, playerCallbackInternal)
+        this.stateListeners.addAll(stateListeners)
+        this.playingDelegates.addAll(playingDelegates)
 
-        with(stateListeners) {
-            add(mediaSessionListener)
-        }
-
-        with(playingDelegates) {
-            add(exoPlayerDelegate)
-            add(chromeCastDelegate)
+        playingDelegates.forEach {
+            it.attache(leadingCallback, playerCallbackInternal, isLeadingProvider)
         }
 
         selectLeadingDelegate()
@@ -202,7 +189,10 @@ class MainPlayerImpl(
 
         fun release() {
             Timber.d("release")
-            playingDelegates.forEach { it.release() }
+            playingDelegates.forEach {
+                it.release()
+                it.detache()
+            }
             playingDelegates.clear()
             currentState = Empty()
             stateListeners.forEach { it.onStop() }
