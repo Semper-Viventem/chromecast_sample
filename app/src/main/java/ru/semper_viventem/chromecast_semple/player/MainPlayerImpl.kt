@@ -12,22 +12,21 @@ class MainPlayerImpl(
     mediaSession: MediaSessionCompat
 ) : Player {
 
-    private val chromeCastLeadingCallback = object : PlayingDelegate.LeadingCallback {
+    private val leadingCallback = object : PlayingDelegate.LeadingCallback {
 
-        override fun onStartLeading() {
+        override fun onStartLeading(delegate: PlayingDelegate) {
             val leadingParams = if (currentState !is Empty) {
                 PlayingDelegate.LeadingParams(mediaContent!!, positionInMillis, duration, isPlaying, speed, volume)
             } else {
                 null
             }
 
-            val newLeadingDelegate = playingDelegates.find { it is ChromeCastDelegate }!!
+            val newLeadingDelegate = playingDelegates.find { it::class.java == delegate::class.java }!!
             setLeadingDelegate(newLeadingDelegate, leadingParams)
         }
 
-        override fun onStopLeading(leadingParams: PlayingDelegate.LeadingParams) {
-            val newLeadingDelegate = playingDelegates.find { it is ExoPlayerDelegate }!!
-            setLeadingDelegate(newLeadingDelegate, leadingParams)
+        override fun onStopLeading(delegate: PlayingDelegate, leadingParams: PlayingDelegate.LeadingParams) {
+            selectLeadingDelegate(leadingParams)
         }
     }
 
@@ -37,11 +36,14 @@ class MainPlayerImpl(
         }
     }
 
-    private val stateListeners = mutableListOf<PlayerStateListener>()
-    private val playingDelegates = mutableListOf<PlayingDelegate>()
     private var mediaContent: MediaContent? = null
 
+    private val stateListeners = mutableListOf<PlayerStateListener>()
+    private val playingDelegates = mutableListOf<PlayingDelegate>()
+
     private lateinit var leadingDelegate: PlayingDelegate
+
+    val listeners = hashSetOf<Player.PlayerCallback>()
 
     private var currentState: State = Empty()
         set(value) {
@@ -49,9 +51,28 @@ class MainPlayerImpl(
             field.notifyListeners()
         }
 
-    val listeners = hashSetOf<Player.PlayerCallback>()
+    init {
+        val playerCallbackInternal = PlayerCallbackInternal()
 
-    //region player interface
+        val mediaSessionListener = MediaSessionListener(context, mediaSession)
+        val chromeCastDelegate = ChromeCastDelegate(context, isLeadingProvider, playerCallbackInternal).apply {
+            setOnLeadingCallback(leadingCallback)
+        }
+        val exoPlayerDelegate = ExoPlayerDelegate(context, isLeadingProvider, playerCallbackInternal)
+
+        with(stateListeners) {
+            add(mediaSessionListener)
+        }
+
+        with(playingDelegates) {
+            add(exoPlayerDelegate)
+            add(chromeCastDelegate)
+        }
+
+        selectLeadingDelegate()
+    }
+    //endregion player interface
+
     override var volume
         get() = currentState.volume
         set(value) {
@@ -77,32 +98,6 @@ class MainPlayerImpl(
     override val duration get() = currentState.duration
     override val isReleased get() = currentState.isReleased
 
-    init {
-        val playerCallbackInternal = PlayerCallbackInternal()
-
-        val mediaSessionListener = MediaSessionListener(context, mediaSession)
-        val chromeCastDelegate = ChromeCastDelegate(context, isLeadingProvider, playerCallbackInternal).apply {
-            setOnLeadingCallback(chromeCastLeadingCallback)
-        }
-        val exoPlayerDelegate = ExoPlayerDelegate(context, isLeadingProvider, playerCallbackInternal)
-
-        with(stateListeners) {
-            add(mediaSessionListener)
-        }
-
-        with(playingDelegates) {
-            add(exoPlayerDelegate)
-            add(chromeCastDelegate)
-        }
-
-        playingDelegates.forEach {
-            if (it.readyForLeading()) {
-                setLeadingDelegate(it)
-                return@forEach
-            }
-        }
-    }
-
     override fun prepare(mediaContent: MediaContent) {
         this.mediaContent = mediaContent
         currentState.prepare(mediaContent)
@@ -124,7 +119,17 @@ class MainPlayerImpl(
 
     override fun getListeners(): MutableSet<Player.PlayerCallback> = listeners
 
-    //endregion player interface
+    // region internal
+
+    private fun selectLeadingDelegate(leadingParams: PlayingDelegate.LeadingParams? = null) {
+
+        playingDelegates.forEach {
+            if (it.readyForLeading()) {
+                setLeadingDelegate(it, leadingParams)
+                return@forEach
+            }
+        }
+    }
 
     /**
      * Send current player state to new listener
@@ -155,6 +160,7 @@ class MainPlayerImpl(
     }
 
     //region player states
+
     /**
      * Abstract state class for player
      */

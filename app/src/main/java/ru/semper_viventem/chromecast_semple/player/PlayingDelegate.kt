@@ -67,9 +67,9 @@ abstract class PlayingDelegate(
 
     interface LeadingCallback {
 
-        fun onStartLeading()
+        fun onStartLeading(delegate: PlayingDelegate)
 
-        fun onStopLeading(leadingParams: LeadingParams)
+        fun onStopLeading(delegate: PlayingDelegate, leadingParams: LeadingParams)
     }
 
     interface IsLeadingProvider {
