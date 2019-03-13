@@ -8,7 +8,7 @@ abstract class PlayingDelegate : Player {
     protected var playerCallback: Player.PlayerCallback? = null
         get() = field ?: throw IllegalStateException("Delegate must be attached to use this method!")
 
-    protected var isAttached: Boolean? = false
+    protected var isAttached: Boolean = false
 
     protected var leadingCallback: LeadingCallback? = null
 

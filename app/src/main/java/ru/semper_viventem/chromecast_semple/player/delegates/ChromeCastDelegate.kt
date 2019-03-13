@@ -208,7 +208,7 @@ class ChromeCastDelegate(
         }
     }
 
-    private fun stopCasting(removeListener: Boolean = false) {
+    private fun stopCasting(andRelease: Boolean = false) {
 
         val leadingParams = LeadingParams(
             mediaContent!!,
@@ -219,7 +219,7 @@ class ChromeCastDelegate(
             volume
         )
 
-        if (removeListener) {
+        if (andRelease) {
             sessionManager?.removeSessionManagerListener(mediaSessionListener, CastSession::class.java)
         }
 
@@ -228,7 +228,7 @@ class ChromeCastDelegate(
         currentSession?.remoteMediaClient?.stop()
         currentSession = null
 
-        if (isLeading) {
+        if (isLeading && !andRelease) {
             leadingCallback?.onStopLeading(this, leadingParams)
         }
     }
