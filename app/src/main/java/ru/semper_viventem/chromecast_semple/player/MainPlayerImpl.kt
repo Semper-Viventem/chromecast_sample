@@ -245,8 +245,8 @@ class MainPlayerImpl(
         fun release() {
             Timber.d("release")
             playingDelegates.forEach {
-                it.release()
                 it.detach()
+                it.release()
             }
             playingDelegates.clear()
             currentState = Empty()
