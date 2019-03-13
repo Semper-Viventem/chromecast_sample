@@ -19,10 +19,8 @@ import ru.semper_viventem.chromecast_semple.player.SpeedProvider
 import timber.log.Timber
 
 class ExoPlayerDelegate(
-    private val context: Context,
-    isLeadingProvider: IsLeadingProvider,
-    playerCallback: ru.semper_viventem.chromecast_semple.player.Player.PlayerCallback
-) : PlayingDelegate(playerCallback, isLeadingProvider) {
+    private val context: Context
+) : PlayingDelegate() {
 
     companion object {
         private const val PROGRESS_DELAY_MILLS = 500L
@@ -68,7 +66,7 @@ class ExoPlayerDelegate(
 
     init {
         checkProgressRunnable = Runnable {
-            playerCallback.onPlayerProgress(positionInMillis)
+            playerCallback?.onPlayerProgress(positionInMillis)
             progressHandler.postDelayed(checkProgressRunnable, PROGRESS_DELAY_MILLS)
         }
     }
@@ -114,7 +112,6 @@ class ExoPlayerDelegate(
         }
         simpleExoPlayer = null
         getListeners().forEach { it.onReleased() }
-        setOnLeadingCallback(null)
     }
 
     override fun networkIsRestored() {
@@ -161,7 +158,7 @@ class ExoPlayerDelegate(
         private var isStateEnded = false
 
         override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters) {
-            playerCallback.onSetSpeed(playbackParameters.speed)
+            playerCallback?.onSetSpeed(playbackParameters.speed)
         }
 
         override fun onRepeatModeChanged(repeatMode: Int) {
@@ -177,7 +174,7 @@ class ExoPlayerDelegate(
         }
 
         override fun onLoadingChanged(isLoading: Boolean) {
-            playerCallback.onLoadingChanged(isLoading)
+            playerCallback?.onLoadingChanged(isLoading)
         }
 
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
@@ -187,18 +184,18 @@ class ExoPlayerDelegate(
                     isStateEnded = false
                     if (!isPrepared) {
                         isPrepared = true
-                        playerCallback.onPrepared()
+                        playerCallback?.onPrepared()
                     }
                     if (isTrackChanged) {
                         isTrackChanged = false
-                        playerCallback.onDurationChanged(duration)
-                        playerCallback.onPlayerProgress(positionInMillis)
+                        playerCallback?.onDurationChanged(duration)
+                        playerCallback?.onPlayerProgress(positionInMillis)
                     }
                 }
                 com.google.android.exoplayer2.Player.STATE_ENDED -> {
                     if (!isStateEnded) {
                         isStateEnded = true
-                        playerCallback.onPaused(simpleExoPlayer!!.currentPosition)
+                        playerCallback?.onPaused(simpleExoPlayer!!.currentPosition)
                     }
                 }
             }
@@ -208,17 +205,17 @@ class ExoPlayerDelegate(
             Timber.e(error.cause)
             isPrepared = false
             if (error.type == ExoPlaybackException.TYPE_SOURCE && error.cause is HttpDataSource.HttpDataSourceException) {
-                playerCallback.onWaitingForNetwork()
+                playerCallback?.onWaitingForNetwork()
             } else {
-                playerCallback.onError(error.message)
+                playerCallback?.onError(error.message)
             }
         }
 
         override fun onPositionDiscontinuity() {
             try {
                 isTrackChanged = true
-                playerCallback.onDurationChanged(duration)
-                playerCallback.onPlayerProgress(positionInMillis)
+                playerCallback?.onDurationChanged(duration)
+                playerCallback?.onPlayerProgress(positionInMillis)
             } catch (exception: IllegalStateException) {
                 Timber.e(exception) // ignore video player seek actions when error occurred
             }
@@ -230,7 +227,7 @@ class ExoPlayerDelegate(
     private open inner class SeekPlayerEventListener : ExtendedSimpleExoPlayer.SeekListener {
 
         override fun onSeek(fromTimeInMillis: Long, toTimeInMillis: Long) {
-            playerCallback.onSeekTo(fromTimeInMillis, toTimeInMillis)
+            playerCallback?.onSeekTo(fromTimeInMillis, toTimeInMillis)
         }
     }
 }

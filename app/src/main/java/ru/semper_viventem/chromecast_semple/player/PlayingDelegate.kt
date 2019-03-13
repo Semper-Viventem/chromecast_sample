@@ -1,12 +1,20 @@
 package ru.semper_viventem.chromecast_semple.player
 
-abstract class PlayingDelegate(
-    protected val playerCallback: Player.PlayerCallback,
-    private val isLeadingProvider: IsLeadingProvider
-) : Player {
+abstract class PlayingDelegate : Player {
+
+    private var isLeadingProvider: IsLeadingProvider? = null
+        get() = field ?: throw IllegalStateException("Delegate must be attached to use this method!")
+
+    protected var playerCallback: Player.PlayerCallback? = null
+        get() = field ?: throw IllegalStateException("Delegate must be attached to use this method!")
+
+    protected var isAttached: Boolean = false
 
     protected var leadingCallback: LeadingCallback? = null
-    protected val isLeading: Boolean get() = isLeadingProvider.isLeading(this)
+
+    protected val isLeading: Boolean
+        get() = isLeadingProvider?.isLeading(this)
+            ?: throw IllegalStateException("Delegate must be attached to use this method!")
 
     fun setIsLeading(isLeading: Boolean, leadingParams: LeadingParams? = null) {
         if (isLeading) {
@@ -28,8 +36,22 @@ abstract class PlayingDelegate(
         return mutableSetOf()
     }
 
-    fun setOnLeadingCallback(leadingCallback: LeadingCallback?) {
+    fun attache(
+        leadingCallback: LeadingCallback,
+        playerCallback: Player.PlayerCallback,
+        isLeadingProvider: IsLeadingProvider
+    ) {
         this.leadingCallback = leadingCallback
+        this.playerCallback = playerCallback
+        this.isLeadingProvider = isLeadingProvider
+        isAttached = true
+    }
+
+    fun detach() {
+        isAttached = false
+        leadingCallback = null
+        playerCallback = null
+        isLeadingProvider = null
     }
 
     /**
@@ -67,9 +89,9 @@ abstract class PlayingDelegate(
 
     interface LeadingCallback {
 
-        fun onStartLeading()
+        fun onStartLeading(delegate: PlayingDelegate)
 
-        fun onStopLeading(leadingParams: LeadingParams)
+        fun onStopLeading(delegate: PlayingDelegate, leadingParams: LeadingParams)
     }
 
     interface IsLeadingProvider {
