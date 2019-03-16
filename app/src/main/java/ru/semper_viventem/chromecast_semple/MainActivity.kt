@@ -8,13 +8,13 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.google.android.gms.cast.framework.CastButtonFactory
 import kotlinx.android.synthetic.main.activity_main.*
-import ru.semper_viventem.chromecast_semple.player.MainPlayerImpl
-import ru.semper_viventem.chromecast_semple.player.MediaContent
-import ru.semper_viventem.chromecast_semple.player.MediaMetadata
-import ru.semper_viventem.chromecast_semple.player.Player
-import ru.semper_viventem.chromecast_semple.player.delegates.ChromeCastDelegate
-import ru.semper_viventem.chromecast_semple.player.delegates.ExoPlayerDelegate
-import ru.semper_viventem.chromecast_semple.player.delegates.MediaSessionListener
+import ru.semper_viventem.playerdelegates.MainPlayerImpl
+import ru.semper_viventem.playerdelegates.MediaContent
+import ru.semper_viventem.playerdelegates.MediaMetadata
+import ru.semper_viventem.playerdelegates.Player
+import ru.semper_viventem.playerdelegates.delegates.ChromeCastDelegate
+import ru.semper_viventem.playerdelegates.delegates.ExoPlayerDelegate
+import ru.semper_viventem.playerdelegates.delegates.MediaSessionListener
 
 class MainActivity : AppCompatActivity() {
 

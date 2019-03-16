@@ -1,4 +1,4 @@
-package ru.semper_viventem.chromecast_semple.player.delegates
+package ru.semper_viventem.playerdelegates.delegates
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -6,17 +6,16 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import ru.semper_viventem.chromecast_semple.player.MediaContent
-import ru.semper_viventem.chromecast_semple.player.PlayerStateListener
+import ru.semper_viventem.playerdelegates.MediaContent
+import ru.semper_viventem.playerdelegates.PlayerStateListener
 
 class MediaSessionListener(
     private val context: Context,
     private val mediaSessionCompat: MediaSessionCompat
-): PlayerStateListener {
+) : PlayerStateListener {
 
     private var isPlaying: Boolean = false
     private val stateBuilder: PlaybackStateCompat.Builder = PlaybackStateCompat.Builder().setActions(
@@ -44,15 +43,25 @@ class MediaSessionListener(
             .asBitmap()
             .load(mediaContent.metadata.posterUrl)
             .listener(object : RequestListener<Bitmap> {
-                override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Bitmap>?, isFirstResource: Boolean): Boolean {
-                    return true
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Bitmap>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    return false
                 }
 
-                override fun onResourceReady(resource: Bitmap, model: Any?, target: Target<Bitmap>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+                override fun onResourceReady(
+                    resource: Bitmap?,
+                    model: Any?,
+                    target: Target<Bitmap>?,
+                    dataSource: com.bumptech.glide.load.DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
                     startMediaSession(metadata.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, resource).build())
                     return true
                 }
-
             })
             .submit()
         startMediaSession(metadata.build())
