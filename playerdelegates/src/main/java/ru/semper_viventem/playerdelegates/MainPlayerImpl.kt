@@ -1,4 +1,4 @@
-package ru.semper_viventem.chromecast_semple.player
+package ru.semper_viventem.playerdelegates
 
 import timber.log.Timber
 

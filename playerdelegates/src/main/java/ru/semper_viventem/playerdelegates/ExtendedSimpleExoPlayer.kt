@@ -1,4 +1,4 @@
-package ru.semper_viventem.chromecast_semple.player
+package ru.semper_viventem.playerdelegates
 
 import com.google.android.exoplayer2.LoadControl
 import com.google.android.exoplayer2.RenderersFactory

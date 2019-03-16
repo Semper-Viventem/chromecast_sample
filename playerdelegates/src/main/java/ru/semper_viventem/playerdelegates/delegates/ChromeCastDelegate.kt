@@ -1,4 +1,4 @@
-package ru.semper_viventem.chromecast_semple.player.delegates
+package ru.semper_viventem.playerdelegates.delegates
 
 import android.content.Context
 import android.net.Uri
@@ -12,9 +12,8 @@ import com.google.android.gms.cast.framework.SessionManager
 import com.google.android.gms.cast.framework.SessionManagerListener
 import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.android.gms.common.images.WebImage
-import ru.semper_viventem.chromecast_semple.player.MediaContent
-import ru.semper_viventem.chromecast_semple.player.PlayingDelegate
-import ru.semper_viventem.chromecast_semple.player.SpeedProvider
+import ru.semper_viventem.playerdelegates.MediaContent
+import ru.semper_viventem.playerdelegates.PlayingDelegate
 import timber.log.Timber
 
 class ChromeCastDelegate(
@@ -25,6 +24,7 @@ class ChromeCastDelegate(
         private const val CONTENT_TYPE_VIDEO = "videos/mp4"
         private const val CONTENT_TYPE_AUDIO = "audio/mp3"
         private const val PROGRESS_DELAY_MILLS = 500L
+        private const val DEFAULT_SPEED = 1F
     }
 
     private var sessionManager: SessionManager? = null
@@ -114,7 +114,7 @@ class ChromeCastDelegate(
             Timber.d("On set position")
         }
 
-    override var speed: Float = SpeedProvider.default()
+    override var speed: Float = DEFAULT_SPEED
         set(value) {
             field = value
             checkAndStartCasting()

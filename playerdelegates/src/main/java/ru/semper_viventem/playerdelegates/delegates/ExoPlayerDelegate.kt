@@ -1,4 +1,4 @@
-package ru.semper_viventem.chromecast_semple.player.delegates
+package ru.semper_viventem.playerdelegates.delegates
 
 import android.content.Context
 import android.os.Handler
@@ -11,11 +11,10 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.upstream.HttpDataSource
-import ru.semper_viventem.chromecast_semple.R
-import ru.semper_viventem.chromecast_semple.player.ExtendedSimpleExoPlayer
-import ru.semper_viventem.chromecast_semple.player.MediaContent
-import ru.semper_viventem.chromecast_semple.player.PlayingDelegate
-import ru.semper_viventem.chromecast_semple.player.SpeedProvider
+import ru.semper_viventem.playerdelegates.ExtendedSimpleExoPlayer
+import ru.semper_viventem.playerdelegates.MediaContent
+import ru.semper_viventem.playerdelegates.PlayingDelegate
+import ru.semper_viventem.playerdelegates.R
 import timber.log.Timber
 
 class ExoPlayerDelegate(
@@ -24,6 +23,7 @@ class ExoPlayerDelegate(
 
     companion object {
         private const val PROGRESS_DELAY_MILLS = 500L
+        private const val DEFAULT_SPEED = 1F
     }
 
     var simpleExoPlayer: ExtendedSimpleExoPlayer? = null
@@ -53,7 +53,7 @@ class ExoPlayerDelegate(
         }
 
     override var speed: Float
-        get() = simpleExoPlayer?.playbackParameters?.speed ?: SpeedProvider.default()
+        get() = simpleExoPlayer?.playbackParameters?.speed ?: DEFAULT_SPEED
         set(value) {
             simpleExoPlayer!!.playbackParameters = PlaybackParameters(value, simpleExoPlayer!!.playbackParameters.pitch)
         }
