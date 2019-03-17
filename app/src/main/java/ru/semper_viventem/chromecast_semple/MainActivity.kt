@@ -78,7 +78,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private val mediaSessionCallback = object: MediaSessionCompat.Callback() {
+    private val mediaSessionCallback = object : MediaSessionCompat.Callback() {
         override fun onPlay() {
             player!!.play()
         }
@@ -130,7 +130,7 @@ class MainActivity : AppCompatActivity() {
         mediaSession = MediaSessionCompat(this, MEDIA_SESSION_TAG)
 
         val chromeCastDelegate = ChromeCastDelegate(this)
-        val exoPlayerDelegate = ExoPlayerDelegate(this)
+        val exoPlayerDelegate = ExoPlayerDelegate(this, getString(R.string.app_name))
         val mediaSessionListener = MediaSessionListener(this, mediaSession)
 
         player = MainPlayerImpl(

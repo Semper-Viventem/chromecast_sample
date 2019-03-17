@@ -14,11 +14,11 @@ import com.google.android.exoplayer2.upstream.HttpDataSource
 import ru.semper_viventem.playerdelegates.ExtendedSimpleExoPlayer
 import ru.semper_viventem.playerdelegates.MediaContent
 import ru.semper_viventem.playerdelegates.PlayingDelegate
-import ru.semper_viventem.playerdelegates.R
 import timber.log.Timber
 
 class ExoPlayerDelegate(
-    private val context: Context
+    private val context: Context,
+    appName: String
 ) : PlayingDelegate() {
 
     companion object {
@@ -29,7 +29,7 @@ class ExoPlayerDelegate(
     var simpleExoPlayer: ExtendedSimpleExoPlayer? = null
         private set
 
-    private val applicationName: String = context.getString(R.string.app_name)
+    private val applicationName: String = appName
     private lateinit var playlist: DynamicConcatenatingMediaSource
 
     private lateinit var checkProgressRunnable: Runnable
