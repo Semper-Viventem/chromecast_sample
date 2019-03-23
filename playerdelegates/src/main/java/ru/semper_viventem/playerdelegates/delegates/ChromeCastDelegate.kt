@@ -188,7 +188,7 @@ class ChromeCastDelegate(
                 }
             }
 
-            val mediaInfo = MediaInfo.Builder(mediaContent!!.contentUri.toString())
+            val mediaInfo = MediaInfo.Builder(mediaContent!!.contentUris.first().toString())
                 .setContentType(getContentType(mediaContent!!.type))
                 .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
                 .setMetadata(mediaMetadata)

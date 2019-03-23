@@ -77,7 +77,7 @@ class ExoPlayerDelegate(
         playlist = DynamicConcatenatingMediaSource()
 
         val dataFactory = DefaultDataSourceFactory(context, applicationName)
-        val audioSource = ExtractorMediaSource(mediaContent.contentUri, dataFactory, extractorsFactory, null, null)
+        val audioSource = ExtractorMediaSource(mediaContent.contentUris.first(), dataFactory, extractorsFactory, null, null)
         playlist.addMediaSource(audioSource)
 
         simpleExoPlayer = ExtendedSimpleExoPlayer(

@@ -276,7 +276,7 @@ class MainPlayerImpl(
         private var playWhenReady = false
 
         init {
-            Timber.d("prepare uri: " + mediaContent.contentUri.toString())
+            Timber.d("prepare uri: " + mediaContent.contentUris.toString())
 
             leadingDelegate.prepare(mediaContent)
 
